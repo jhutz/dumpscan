@@ -69,6 +69,7 @@ extern afs_uint32 xfopen_fd  (XFILE *, int, int);         /* open by fd     */
 extern afs_uint32 xfopen_rxcall (XFILE *, int, struct rx_call *);
 extern afs_uint32 xfopen_voldump(XFILE *, struct rx_connection *,
                               afs_int32, afs_int32, afs_int32);
+extern afs_uint32 xfopen_profile(XFILE *, int, char *, char *);
 
 extern afs_uint32 xfregister(char *, afs_uint32 (*)(XFILE *, int, char *));
 

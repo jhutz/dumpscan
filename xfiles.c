@@ -39,6 +39,7 @@
 extern afs_uint32 xfon_path(XFILE *, int, char *);
 extern afs_uint32 xfon_fd(XFILE *, int, char *);
 extern afs_uint32 xfon_voldump(XFILE *, int, char *);
+extern afs_uint32 xfon_profile(XFILE *, int, char *);
 extern afs_uint32 xfon_stdio(XFILE *, int);
 
 struct xftype {
@@ -187,6 +188,7 @@ static void register_default_types(void)
   xfregister("FILE",    xfon_path);
   xfregister("FD",      xfon_fd);
   xfregister("AFSDUMP", xfon_voldump);
+  xfregister("PROFILE", xfon_profile);
   did_register_defaults = 1;
 }
 

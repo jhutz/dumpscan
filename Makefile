@@ -17,7 +17,7 @@ LIBS                 = -ldumpscan -lxfiles \
 OBJS_afsdump_scan    = afsdump_scan.o repair.o
 OBJS_afsdump_xsed    = afsdump_xsed.o repair.o
 OBJS_libxfiles.a     = xfiles.o xf_errs.o xfprintf.o int64.o \
-                       xf_files.o xf_rxcall.o
+                       xf_files.o xf_rxcall.o xf_profile.o
 OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        parsedump.o parsevol.o parsevnode.o dump.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
