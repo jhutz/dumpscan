@@ -29,12 +29,16 @@ COMPILE_ET = compile_et
 RANLIB     = ranlib
 
 # On Linux:
+ifeq ($(shell uname),Linux)
 R=-Wl,-rpath,
+endif
 
 # On Solaris:
-# R        = -R
-# XLDFLAGS = -L/usr/ucblib -R/usr/ucblib
-# XLIBS    = -lsocket -lnsl -lucb -lresolv
+ifeq ($(shell uname),SunOS)
+R        = -R
+XLDFLAGS = -L/usr/ucblib -R/usr/ucblib
+XLIBS    = -lsocket -lnsl -lucb -lresolv
+endif
 
 DEBUG      = -g
 INCLUDES   = -I/usr/local/include
