@@ -34,7 +34,7 @@ R=-Wl,-rpath,
 # On Solaris:
 # R        = -R
 # XLDFLAGS = -L/usr/ucblib -R/usr/ucblib
-# XLIBS    = -lsocket -lnsl -lucb
+# XLIBS    = -lsocket -lnsl -lucb -lresolv
 
 DEBUG      = -g
 INCLUDES   = -I/usr/local/include

@@ -33,6 +33,13 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include <afs/stds.h>
+#include <rx/rxkad.h>
+#include <ubik.h>
+#include <afs/cellconfig.h>
+#include <afs/volser.h>
+#include <afs/vlserver.h>
+
 #include "dumpscan.h"
 
 extern int optind;
