@@ -136,8 +136,8 @@ static void parse_options(int argc, char **argv)
       if (argv[i][0] == '/') name_count++;
       else                   vnum_count++;
     }
-    file_names = (char **)malloc(name_count + sizeof(char *));
-    file_vnums = (afs_uint32 *)malloc(vnum_count + sizeof(afs_uint32));
+    file_names = (char **)malloc((name_count + 1) * sizeof(char *));
+    file_vnums = (afs_uint32 *)malloc((vnum_count + 1) * sizeof(afs_uint32));
     if (name_count) use_realpath = 1;
 
     i_name = i_vnum = 0;
@@ -145,6 +145,8 @@ static void parse_options(int argc, char **argv)
       if (argv[i][0] == '/') file_names[i_name++] = argv[i];
       else                   file_vnums[i_vnum++] = strtol(argv[i], 0, 0);
     }
+    file_names[i_name] = 0;
+    file_vnums[i_vnum] = 0;
   }
 }
 
@@ -224,12 +226,16 @@ static int usevnode(XFILE *X, afs_uint32 vnum, char *vnodepath)
 {
   int vl, vpl, r, i;
 
-  /* Special case */
-  if (extract_all || !strcmp(vnodepath, "/"))
-    return 1;
+  if (extract_all) return 1;
 
   for (i = 0; i < vnum_count; i++)
     if (vnum == file_vnums[i]) return 2;
+
+  if (!vnodepath) return 0;
+
+  /* Special case */
+  if (!strcmp(vnodepath, "/"))
+    return 1;
 
   vl = strlen(vnodepath);
 /*fprintf(stderr, "++ checking %s\n", vnodepath);*/
@@ -293,17 +299,18 @@ static afs_uint32 volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
 
 static afs_uint32 directory_cb(afs_vnode *v, XFILE *X, void *refcon)
 {
-  char *vnodepath;
+  char *vnodepath = 0;
   int r, use;
 
   /* Should we even use this? */
   if (!use_vnum) {
     if (r = Path_Build(X, &phi, v->vnode, &vnodepath, !use_realpath))
       return r;
-    if (!(use = usevnode(X, v->vnode, vnodepath))) {
-      free(vnodepath);
-      return 0;
-    }
+  }
+
+  if (!(use = usevnode(X, v->vnode, vnodepath))) {
+    if (!use_vnum) free(vnodepath);
+    return 0;
   }
 
   /* Print it out */
@@ -362,6 +369,8 @@ static afs_uint32 file_cb(afs_vnode *v, XFILE *X, void *refcon)
       vnodepath = vnpx;
     }
   } else {
+    if (!(use = usevnode(X, v->vnode, 0)))
+      return 0;
     sprintf(vnpx, "#%d:%d", v->vnode, v->vuniq);
     vnodepath = vnpx;
   }
@@ -417,6 +426,8 @@ static afs_uint32 symlink_cb(afs_vnode *v, XFILE *X, void *refcon)
       vnodepath = vnpx;
     }
   } else {
+    if (!(use = usevnode(X, v->vnode, 0)))
+      return 0;
     sprintf(vnpx, "#%d:%d", v->vnode, v->vuniq);
     vnodepath = vnpx;
   }
