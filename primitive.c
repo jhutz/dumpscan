@@ -119,3 +119,47 @@ afs_uint32 WriteString(XFILE *X, unsigned char *str)
   int len = strlen((char *)str) + 1;
   return xfwrite(X, str, len);
 }
+
+afs_uint32 WriteTagByte(XFILE *X, unsigned char tag, unsigned char val)
+{
+  char buffer[2];
+  buffer[0] = tag;
+  buffer[1] = val;
+  return xfwrite(X, buffer, 2);
+}
+
+afs_uint32 WriteTagInt16(XFILE *X, unsigned char tag, afs_uint16 val)
+{
+  char buffer[3];
+  buffer[0] = tag;
+  buffer[1] = (val & 0xff00) >> 8;
+  buffer[2] = val & 0xff;
+  return xfwrite(X, buffer, 3);
+}
+
+afs_uint32 WriteTagInt32(XFILE *X, unsigned char tag, afs_uint32 val)
+{
+  char buffer[5];
+  buffer[0] = tag;
+  buffer[1] = (val & 0xff000000) >> 24;
+  buffer[2] = (val & 0xff0000) >> 16;
+  buffer[3] = (val & 0xff00) >> 8;
+  buffer[4] = val & 0xff;
+  return xfwrite(X, buffer, 5);
+}
+
+afs_uint32 WriteTagInt32Pair(XFILE *X, unsigned char tag,
+                             afs_uint32 val1, afs_uint32 val2)
+{
+  char buffer[9];
+  buffer[0] = tag;
+  buffer[1] = (val1 & 0xff000000) >> 24;
+  buffer[2] = (val1 & 0xff0000) >> 16;
+  buffer[3] = (val1 & 0xff00) >> 8;
+  buffer[4] = val1 & 0xff;
+  buffer[5] = (val2 & 0xff000000) >> 24;
+  buffer[6] = (val2 & 0xff0000) >> 16;
+  buffer[7] = (val2 & 0xff00) >> 8;
+  buffer[8] = val2 & 0xff;
+  return xfwrite(X, buffer, 9);
+}

@@ -326,6 +326,10 @@ extern afs_uint32 WriteByte(XFILE *, unsigned char);
 extern afs_uint32 WriteInt16(XFILE *, afs_uint16);
 extern afs_uint32 WriteInt32(XFILE *, afs_uint32);
 extern afs_uint32 WriteString(XFILE *, unsigned char *);
+extern afs_uint32 WriteTagByte(XFILE *, unsigned char, unsigned char);
+extern afs_uint32 WriteTagInt16(XFILE *, unsigned char, afs_uint16);
+extern afs_uint32 WriteTagInt32(XFILE *, unsigned char, afs_uint32);
+extern afs_uint32 WriteTagInt32Pair(XFILE *, unsigned char, afs_uint32, afs_uint32);
 
 /* parsetag.c - Parse tagged data */
 extern afs_uint32 ParseTaggedData(XFILE *, tagged_field *, unsigned char *,

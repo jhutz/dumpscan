@@ -170,7 +170,7 @@ afs_uint32 vxfprintf(XFILE *X, char *fmt, va_list ap)
   unsigned int width, precision, haveprec, len;
   int ljust, plsign, spsign, altform, zfill;
   int hflag, lflag, count, *countp, j;
-  char *x, *y, *lit, xbuf[MAXPREC + 21], fbuf[20];
+  char *x, *y, *lit = 0, xbuf[MAXPREC + 21], fbuf[20];
   struct hostent *he;
   struct in_addr ia;
   unsigned long UVAL;
