@@ -131,7 +131,7 @@ void main(int argc, char **argv)
   dp.print_flags  = DSPRINT_DIR;
   if (input_file.is_seekable) dp.flags |= DSFLAG_SEEK;
 
-  r = ParseDirectory(&input_file, &dp, -1);
+  r = ParseDirectory(&input_file, &dp, 0, 1);
   xfclose(&input_file);
 
   if (verbose && error_count) fprintf(stderr, "*** %d errors\n", error_count);

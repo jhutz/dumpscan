@@ -41,7 +41,8 @@ extern u_int32 parse_vnode(XFILE *, unsigned char *, tagged_field *, u_int32,
                            tag_parse_info *, void *, void *);
 
 /* directory.c - Routines for parsing AFS directories */
-extern u_int32 parse_directory(XFILE *, dump_parser *, afs_vnode *, u_int32);
+extern u_int32 parse_directory(XFILE *, dump_parser *, afs_vnode *,
+                               u_int32, int);
 
 /* backuphdr.c - Generic support for backup system headers */
 extern u_int32 try_backuphdr(XFILE *X, unsigned char *tag, tagged_field *field,

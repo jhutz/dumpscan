@@ -409,7 +409,7 @@ static u_int32 parse_vdata(XFILE *X, unsigned char *tag, tagged_field *field,
 
     case vDirectory:
       if (p->cb_dirent || (p->print_flags & DSPRINT_DIR)) {
-        if (r = parse_directory(X, p, v, v->size)) return r;
+        if (r = parse_directory(X, p, v, v->size, 0)) return r;
         break;
       }
 

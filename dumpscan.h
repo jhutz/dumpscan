@@ -345,7 +345,7 @@ extern u_int32 ParseVNode(XFILE *, dump_parser *);
 
 
 /* directory.c - Directory parsing and lookup */
-extern u_int32 ParseDirectory(XFILE *, dump_parser *, u_int32);
+extern u_int32 ParseDirectory(XFILE *, dump_parser *, u_int32, int);
 extern u_int32 DirectoryLookup(XFILE *, dump_parser *, u_int32,
                            char **, u_int32 *, u_int32 *);
 

@@ -56,7 +56,8 @@ static void fixup(char *name, int l)
   }
 }
 
-u_int32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v, u_int32 size)
+u_int32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
+                        u_int32 size, int toeof)
 {
   afs_dir_entry de;
   int pgno, i, j, l, n;
@@ -68,10 +69,10 @@ u_int32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v, u_int32 size)
     printf("  ========== ==========  ==============================\n");
   }
   if ((p->flags & DSFLAG_SEEK) && (r = xftell(X, &where))) return r;
-  for (pgno = 0; size; pgno++, size -= (size < 0) ? 0 : AFS_PAGESIZE) {
+  for (pgno = 0; toeof || size; pgno++, size -= (toeof ? 0 : AFS_PAGESIZE)) {
     if ((p->flags & DSFLAG_SEEK) && (r = xfseek(X, &where))) return r;
     if (r = xfread(X, &page, AFS_PAGESIZE)) {
-      if (size < 0 && r == ERROR_XFILE_EOF) break;
+      if (toeof && r == ERROR_XFILE_EOF) break;
       return r;
     }
     if ((p->flags & DSFLAG_SEEK) && (r = xftell(X, &where))) return r;
@@ -121,11 +122,11 @@ u_int32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v, u_int32 size)
 }
 
 
-u_int32 ParseDirectory(XFILE *X, dump_parser *p, u_int32 size)
+u_int32 ParseDirectory(XFILE *X, dump_parser *p, u_int32 size, int toeof)
 {
   u_int32 r;
 
-  r = parse_directory(X, p, 0, size);
+  r = parse_directory(X, p, 0, size, toeof);
 }
 
 
@@ -187,7 +188,7 @@ u_int32 DirectoryLookup(XFILE *X, dump_parser *p, u_int32 size,
   my_p.cb_error = p->cb_error;
   my_p.cb_dirent  = dirlookup_cb;
 
-  r = parse_directory(X, &my_p, 0, size);
+  r = parse_directory(X, &my_p, 0, size, 0);
   if (!r) r = DSERR_DONE;
   return handle_return(r, X, 0, p);
 }
