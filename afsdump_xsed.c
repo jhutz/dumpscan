@@ -1,6 +1,6 @@
 /*
  * COPYRIGHT NOTICE
- * Copyright (c) 1997 Carnegie Mellon University
+ * Copyright (c) 1997, 2001 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its

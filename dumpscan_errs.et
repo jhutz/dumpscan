@@ -1,5 +1,7 @@
-# COPYRIGHT NOTICE
-# Copyright (c) 1997 Carnegie Mellon University
+# CMUCS AFStools
+# dumpscan - routines for scanning and manipulating AFS volume dumps
+#
+# Copyright (c) 1997, 2001 Carnegie Mellon University
 # All Rights Reserved.
 # 
 # Permission to use, copy, modify and distribute this software and its
@@ -22,8 +24,7 @@
 # any improvements or extensions that they make and grant Carnegie Mellon
 # the rights to redistribute these changes.
 
-# UB - Unified Backups
-# methods/afs/dumpscan/afsdump_errs.et - AFS dump scanner errors
+# afsdump_errs.et - AFS dump scanner errors
 
 error_table AVds
   ec DSERR_TAG,            "Unknown tag in AFS volume dump"
