@@ -34,14 +34,14 @@
 #include "dumpscan_errs.h"
 #include "stagehdr.h"
 
-u_int32 try_backuphdr(XFILE *X, char *tag, tagged_field *field,
-                      u_int32 value, tag_parse_info *pi,
+afs_uint32 try_backuphdr(XFILE *X, char *tag, tagged_field *field,
+                      afs_uint32 value, tag_parse_info *pi,
                       void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   backup_system_header bh;
   u_int64 where;
-  u_int32 r;
+  afs_uint32 r;
 
   /* Which header should we try (if any)? */
   switch (*tag) {

@@ -277,7 +277,7 @@ void verify_int64_size () {
 void test_int64_constructs(void)
 {
   u_int64 x, y;
-  u_int32 hi, lo;
+  afs_uint32 hi, lo;
   int failures = 0, pass;
   char buf[17];
 

@@ -125,8 +125,8 @@
 #define AFS_DIR_EPP 64
 
 typedef struct {
-  u_int16 pgcount;
-  u_int16 tag;
+  afs_uint16 pgcount;
+  afs_uint16 tag;
   char freecount;
   char freebitmap[AFS_DIR_EPP/8];
   char padding[32 - (5 + AFS_DIR_EPP/8)];
@@ -135,9 +135,9 @@ typedef struct {
 typedef struct {
   char flag;
   char length;
-  u_int16 next;
-  u_int32 vnode;
-  u_int32 vunique;
+  afs_uint16 next;
+  afs_uint32 vnode;
+  afs_uint32 vunique;
   char name[16];
   char padding[4];
 } afs_dir_direntry;

@@ -40,12 +40,12 @@
 #include <afs/acl.h>
 #include <afs/prs_fs.h>
 
-static u_int32 LastGoodVNode = 0;
-static u_int32 store_vnode(XFILE *, unsigned char *, tagged_field *, u_int32,
+static afs_uint32 LastGoodVNode = 0;
+static afs_uint32 store_vnode(XFILE *, unsigned char *, tagged_field *, afs_uint32,
                            tag_parse_info *, void *, void *);
-static u_int32 parse_acl  (XFILE *, unsigned char *, tagged_field *, u_int32,
+static afs_uint32 parse_acl  (XFILE *, unsigned char *, tagged_field *, afs_uint32,
                            tag_parse_info *, void *, void *);
-static u_int32 parse_vdata(XFILE *, unsigned char *, tagged_field *, u_int32,
+static afs_uint32 parse_vdata(XFILE *, unsigned char *, tagged_field *, afs_uint32,
                            tag_parse_info *, void *, void *);
 
 /** Field list for vnodes **/
@@ -65,11 +65,11 @@ static tagged_field vnode_fields[] = {
   { 0,0,0,0,0,0 }};
 
 
-static u_int32 resync_vnode(XFILE *X, dump_parser *p, afs_vnode *v,
+static afs_uint32 resync_vnode(XFILE *X, dump_parser *p, afs_vnode *v,
                             int start, int limit)
 {
   u_int64 where, expected_where;
-  u_int32 r;
+  afs_uint32 r;
   int i;
 
   if (r = xftell(X, &expected_where)) return r;
@@ -108,15 +108,15 @@ static u_int32 resync_vnode(XFILE *X, dump_parser *p, afs_vnode *v,
 /* Parse a VNode, including any tagged attributes and data, and call the
  * appropriate callback, if one is defined.
  */
-u_int32 parse_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
-                    u_int32 value, tag_parse_info *pi,
+afs_uint32 parse_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
+                    afs_uint32 value, tag_parse_info *pi,
                     void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
-  u_int32 (*cb)(afs_vnode *, XFILE *, void *);
+  afs_uint32 (*cb)(afs_vnode *, XFILE *, void *);
   u_int64 where, offset2k;
   afs_vnode v;
-  u_int32 r;
+  afs_uint32 r;
 
 
   if (r = xftell(X, &where)) return r;
@@ -140,7 +140,7 @@ u_int32 parse_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
 
   /* Try to resync, if requested */
   if (!r && (p->repair_flags & DSFIX_VFSYNC)) {
-    u_int32 drop;
+    afs_uint32 drop;
     u_int64 xwhere;
 
     if (r = xftell(X, &where)) return r;
@@ -201,14 +201,14 @@ u_int32 parse_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
 
 
 /* Store data in a vnode */
-static u_int32 store_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
-                           u_int32 value, tag_parse_info *pi,
+static afs_uint32 store_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
+                           afs_uint32 value, tag_parse_info *pi,
                            void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   afs_vnode *v = (afs_vnode *)l_refcon;
   time_t when;
-  u_int32 r = 0;
+  afs_uint32 r = 0;
 
   switch (field->tag) {
   case VTAG_TYPE:
@@ -300,7 +300,7 @@ static u_int32 store_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
 }
 
 
-static char *rights2str(u_int32 rights)
+static char *rights2str(afs_uint32 rights)
 {
   static char str[16];
   char *p = str;
@@ -328,14 +328,14 @@ static char *rights2str(u_int32 rights)
 
 
 /* Parse and store the ACL data from a directory vnode */
-static u_int32 parse_acl(XFILE *X, unsigned char *tag, tagged_field *field,
-                         u_int32 value, tag_parse_info *pi,
+static afs_uint32 parse_acl(XFILE *X, unsigned char *tag, tagged_field *field,
+                         afs_uint32 value, tag_parse_info *pi,
                          void *g_refcon, void *l_refcon)
 {
   struct acl_accessList *acl;
   dump_parser *p = (dump_parser *)g_refcon;
   afs_vnode *v = (afs_vnode *)l_refcon;
-  u_int32 r, i, n;
+  afs_uint32 r, i, n;
 
   if (r = xfread(X, v->acl, SIZEOF_LARGEDISKVNODE - SIZEOF_SMALLDISKVNODE))
     return r;
@@ -365,15 +365,15 @@ static u_int32 parse_acl(XFILE *X, unsigned char *tag, tagged_field *field,
 
 
 /* Parse or skip over the vnode data */
-static u_int32 parse_vdata(XFILE *X, unsigned char *tag, tagged_field *field,
-                           u_int32 value, tag_parse_info *pi,
+static afs_uint32 parse_vdata(XFILE *X, unsigned char *tag, tagged_field *field,
+                           afs_uint32 value, tag_parse_info *pi,
                            void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   afs_vnode *v = (afs_vnode *)l_refcon;
   static char *symlink_buf = 0;
   static int symlink_size = 0;
-  u_int32 r;
+  afs_uint32 r;
 
   if (r = ReadInt32(X, &v->size)) return r;
   v->field_mask |= F_VNODE_SIZE;

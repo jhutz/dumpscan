@@ -38,9 +38,9 @@
 #include "xf_errs.h"
 #include "stagehdr.h"
 
-static u_int32 hdr_checksum(char *buf, int size)
+static afs_uint32 hdr_checksum(char *buf, int size)
 {
-  u_int32 sum = 0, n = size / sizeof(u_int32), *words = (u_int32 *)buf;
+  afs_uint32 sum = 0, n = size / sizeof(afs_uint32), *words = (afs_uint32 *)buf;
 
   while (--n)
     sum += ntohl(*words++);
@@ -56,12 +56,12 @@ static u_int32 hdr_checksum(char *buf, int size)
  * Iff there is no header, returns DSERR_MAGIC and leaves us
  * positioned where we started.
  */
-u_int32 ParseStageHdr(XFILE *X, unsigned char *tag, backup_system_header *hdr)
+afs_uint32 ParseStageHdr(XFILE *X, unsigned char *tag, backup_system_header *hdr)
 {
   char buf[STAGE_HDRLEN];
   struct stage_header *bckhdr = (struct stage_header *)buf;
   u_int64 where;
-  u_int32 r;
+  afs_uint32 r;
 
   if (r = xftell(X, &where)) return r;
   if (hdr) memset(hdr, 0, sizeof(*hdr));
@@ -118,12 +118,12 @@ u_int32 ParseStageHdr(XFILE *X, unsigned char *tag, backup_system_header *hdr)
 
 
 /* Dump a stage backup header */
-u_int32 DumpStageHdr(XFILE *OX, backup_system_header *hdr)
+afs_uint32 DumpStageHdr(XFILE *OX, backup_system_header *hdr)
 {
   char buf[STAGE_HDRLEN];
   struct stage_header *bckhdr = (struct stage_header *)buf;
-  u_int32 checksum;
-  u_int32 r;
+  afs_uint32 checksum;
+  afs_uint32 r;
 
   memset(buf, 0, STAGE_HDRLEN);
   bckhdr->c_vers     = hdr->version;

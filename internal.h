@@ -33,23 +33,23 @@
 
 
 /* parsevol.c - Routines to parse volume headers */
-extern u_int32 parse_volhdr(XFILE *, unsigned char *, tagged_field *, u_int32,
+extern afs_uint32 parse_volhdr(XFILE *, unsigned char *, tagged_field *, afs_uint32,
                             tag_parse_info *, void *, void *);
 
 /* parsevnode.c - Routines to parse vnodes and their fields */
-extern u_int32 parse_vnode(XFILE *, unsigned char *, tagged_field *, u_int32,
+extern afs_uint32 parse_vnode(XFILE *, unsigned char *, tagged_field *, afs_uint32,
                            tag_parse_info *, void *, void *);
 
 /* directory.c - Routines for parsing AFS directories */
-extern u_int32 parse_directory(XFILE *, dump_parser *, afs_vnode *,
-                               u_int32, int);
+extern afs_uint32 parse_directory(XFILE *, dump_parser *, afs_vnode *,
+                               afs_uint32, int);
 
 /* backuphdr.c - Generic support for backup system headers */
-extern u_int32 try_backuphdr(XFILE *X, unsigned char *tag, tagged_field *field,
-                             u_int32 value, tag_parse_info *pi,
+extern afs_uint32 try_backuphdr(XFILE *X, unsigned char *tag, tagged_field *field,
+                             afs_uint32 value, tag_parse_info *pi,
                              void *g_refcon, void *l_refcon);
 
 /* util.c - Random utilities */
-extern u_int32 handle_return(int, XFILE *, unsigned char, dump_parser *);
+extern afs_uint32 handle_return(int, XFILE *, unsigned char, dump_parser *);
 extern void prep_pi(dump_parser *, tag_parse_info *);
-extern u_int32 match_next_vnode(XFILE *, dump_parser *, u_int64 *, u_int32);
+extern afs_uint32 match_next_vnode(XFILE *, dump_parser *, u_int64 *, afs_uint32);

@@ -109,9 +109,9 @@ void prep_pi(dump_parser *p, tag_parse_info *pi)
  * Returns 0 if yes, DSERR_FMT if no, something else on error
  */
 /*** THIS FUNCTION INTENDED FOR INTERNAL USE ONLY ***/
-int match_next_vnode(XFILE *X, dump_parser *p, u_int64 *where, u_int32 vnode)
+int match_next_vnode(XFILE *X, dump_parser *p, u_int64 *where, afs_uint32 vnode)
 {
-  u_int32 r, x, y, z;
+  afs_uint32 r, x, y, z;
   unsigned char tag;
 
   if (r = xfseek(X, where)) return r;

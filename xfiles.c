@@ -36,15 +36,15 @@
 
 #define SKIP_SIZE 65536
 
-extern u_int32 xfon_path(XFILE *, int, char *);
-extern u_int32 xfon_fd(XFILE *, int, char *);
-extern u_int32 xfon_voldump(XFILE *, int, char *);
-extern u_int32 xfon_stdio(XFILE *, int);
+extern afs_uint32 xfon_path(XFILE *, int, char *);
+extern afs_uint32 xfon_fd(XFILE *, int, char *);
+extern afs_uint32 xfon_voldump(XFILE *, int, char *);
+extern afs_uint32 xfon_stdio(XFILE *, int);
 
 struct xftype {
   struct xftype *next;
   char *name;
-  u_int32 (*do_on)(XFILE *, int, char *);
+  afs_uint32 (*do_on)(XFILE *, int, char *);
 };
 
 
@@ -52,9 +52,9 @@ static struct xftype *xftypes = 0;
 static int did_register_defaults = 0;
 
 
-u_int32 xfread(XFILE *X, void *buf, u_int32 count)
+afs_uint32 xfread(XFILE *X, void *buf, afs_uint32 count)
 {
-  u_int32 code;
+  afs_uint32 code;
   u_int64 tmp64;
 
   code = (X->do_read)(X, buf, count);
@@ -67,9 +67,9 @@ u_int32 xfread(XFILE *X, void *buf, u_int32 count)
 }
 
 
-u_int32 xfwrite(XFILE *X, void *buf, u_int32 count)
+afs_uint32 xfwrite(XFILE *X, void *buf, afs_uint32 count)
 {
-  u_int32 code;
+  afs_uint32 code;
   u_int64 tmp64;
 
   if (!X->is_writable) return ERROR_XFILE_RDONLY;
@@ -82,7 +82,7 @@ u_int32 xfwrite(XFILE *X, void *buf, u_int32 count)
 }
 
 
-u_int32 xftell(XFILE *X, u_int64 *offset)
+afs_uint32 xftell(XFILE *X, u_int64 *offset)
 {
   if (X->do_tell) return (X->do_tell)(X, offset);
   cp64(*offset, X->filepos);
@@ -90,9 +90,9 @@ u_int32 xftell(XFILE *X, u_int64 *offset)
 }
 
 
-u_int32 xfseek(XFILE *X, u_int64 *offset)
+afs_uint32 xfseek(XFILE *X, u_int64 *offset)
 {
-  u_int32 code;
+  afs_uint32 code;
 
   if (!X->do_seek) return ERROR_XFILE_NOSEEK;
   code = (X->do_seek)(X, offset);
@@ -102,9 +102,9 @@ u_int32 xfseek(XFILE *X, u_int64 *offset)
 }
 
 
-u_int32 xfskip(XFILE *X, u_int32 count)
+afs_uint32 xfskip(XFILE *X, afs_uint32 count)
 {
-  u_int32 code;
+  afs_uint32 code;
   u_int64 tmp64;
 
   /* Use the skip method, if there is one */
@@ -130,7 +130,7 @@ u_int32 xfskip(XFILE *X, u_int32 count)
    */
   {
     char buf[SKIP_SIZE];
-    u_int32 n;
+    afs_uint32 n;
 
     while (count) {
       n = (count > SKIP_SIZE) ? SKIP_SIZE : count;
@@ -142,7 +142,7 @@ u_int32 xfskip(XFILE *X, u_int32 count)
 }
 
 
-u_int32 xfpass(XFILE *X, XFILE *Y)
+afs_uint32 xfpass(XFILE *X, XFILE *Y)
 {
   if (X->passthru) return ERROR_XFILE_ISPASS;
   if (!Y->is_writable) return ERROR_XFILE_RDONLY;
@@ -151,7 +151,7 @@ u_int32 xfpass(XFILE *X, XFILE *Y)
 }
 
 
-u_int32 xfunpass(XFILE *X)
+afs_uint32 xfunpass(XFILE *X)
 {
   if (!X->passthru) return ERROR_XFILE_NOPASS;
   X->passthru = 0;
@@ -159,7 +159,7 @@ u_int32 xfunpass(XFILE *X)
 }
 
 
-u_int32 xfclose(XFILE *X)
+afs_uint32 xfclose(XFILE *X)
 {
   int code = 0;
 
@@ -169,7 +169,7 @@ u_int32 xfclose(XFILE *X)
 }
 
 
-u_int32 xfregister(char *name, u_int32 (*do_on)(XFILE *, int, char *))
+afs_uint32 xfregister(char *name, afs_uint32 (*do_on)(XFILE *, int, char *))
 {
   struct xftype *x;
 
@@ -191,7 +191,7 @@ static void register_default_types(void)
 }
 
 
-u_int32 xfopen(XFILE *X, int flag, char *name)
+afs_uint32 xfopen(XFILE *X, int flag, char *name)
 {
   struct xftype *x;
   char *type, *sep;

@@ -129,7 +129,7 @@ static void parse_options(int argc, char **argv)
       else                   vnum_count++;
     }
     file_names = (char **)malloc(name_count + sizeof(char *));
-    file_vnums = (u_int32 *)malloc(vnum_count + sizeof(u_int32));
+    file_vnums = (afs_uint32 *)malloc(vnum_count + sizeof(afs_uint32));
     if (name_count) use_realpath = 1;
 
     i_name = i_vnum = 0;
@@ -212,7 +212,7 @@ static char *datestr(time_t date)
 /* Should we use this vnode?
  * Return 0 if no, non-0 if yes
  */
-static int usevnode(XFILE *X, u_int32 vnum, char *vnodepath)
+static int usevnode(XFILE *X, afs_uint32 vnum, char *vnodepath)
 {
   int vl, vpl, r, i;
 
@@ -258,7 +258,7 @@ static int copyfile(XFILE *in, XFILE *out, int size)
 
 
 /* A callback to count and print errors */
-static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
+static afs_uint32 my_error_cb(afs_uint32 code, int fatal, void *ref, char *msg, ...)
 {
   va_list alist;
 
@@ -271,19 +271,19 @@ static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
 }
 
 
-static u_int32 dumphdr_cb(afs_dump_header *hdr, XFILE *X, void *refcon)
+static afs_uint32 dumphdr_cb(afs_dump_header *hdr, XFILE *X, void *refcon)
 {
   return 0;
 }
 
 
-static u_int32 volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
+static afs_uint32 volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
 {
   return 0;
 }
 
 
-static u_int32 directory_cb(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 directory_cb(afs_vnode *v, XFILE *X, void *refcon)
 {
   char *vnodepath;
   int r, use;
@@ -328,7 +328,7 @@ static u_int32 directory_cb(afs_vnode *v, XFILE *X, void *refcon)
 }
 
 
-static u_int32 file_cb(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 file_cb(afs_vnode *v, XFILE *X, void *refcon)
 {
   char *vnodepath, vnpx[30];
   u_int64 where;
@@ -384,7 +384,7 @@ static u_int32 file_cb(afs_vnode *v, XFILE *X, void *refcon)
 }
 
 
-static u_int32 symlink_cb(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 symlink_cb(afs_vnode *v, XFILE *X, void *refcon)
 {
   char *vnodepath, *linktarget, vnpx[30];
   u_int64 where;
@@ -447,7 +447,7 @@ static u_int32 symlink_cb(afs_vnode *v, XFILE *X, void *refcon)
 }
 
 
-static u_int32 lose_cb(afs_vnode *v, XFILE *F, void *refcon)
+static afs_uint32 lose_cb(afs_vnode *v, XFILE *F, void *refcon)
 {
   int r;
 
@@ -464,7 +464,7 @@ static u_int32 lose_cb(afs_vnode *v, XFILE *F, void *refcon)
 void main(int argc, char **argv)
 {
   XFILE input_file;
-  u_int32 r;
+  afs_uint32 r;
 
   parse_options(argc, argv);
   initialize_acfg_error_table();

@@ -49,7 +49,7 @@ static void parse_options(int argc, char **argv)
 
 
 /* A callback to count and print errors */
-static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
+static afs_uint32 my_error_cb(afs_uint32 code, int fatal, void *ref, char *msg, ...)
 {
   va_list alist;
 
@@ -63,10 +63,10 @@ static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
 
 
 /* A callback to process file vnodes */
-static u_int32 my_file_cb(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 my_file_cb(afs_vnode *v, XFILE *X, void *refcon)
 {
   static char buf[1024];
-  u_int32 size, nulls, cnulls, maxcnulls, n, r;
+  afs_uint32 size, nulls, cnulls, maxcnulls, n, r;
   char *name = 0;
   int i;
 
@@ -106,7 +106,7 @@ static u_int32 my_file_cb(afs_vnode *v, XFILE *X, void *refcon)
 int main(int argc, char **argv)
 {
   XFILE input_file;
-  u_int32 r;
+  afs_uint32 r;
 
   parse_options(argc, argv);
   initialize_acfg_error_table();

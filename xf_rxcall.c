@@ -48,19 +48,24 @@
 #include <afs/vlserver.h>
 #include <afs/volser.h>
 
+#ifndef AFSCONF_CLIENTNAME
+#include <afs/dirpath.h>
+#define AFSCONF_CLIENTNAME AFSDIR_CLIENT_ETC_DIRPATH
+#endif
+
 #define O_MODE_MASK (O_RDONLY | O_WRONLY | O_RDWR)
 
 struct rxinfo {
   struct rx_connection *conn;  /* connection */
   struct rx_call *call;        /* call */
-  int32 tid;                   /* volser transaction ID */
-  u_int32 code;                /* result code */
+  afs_int32 tid;                   /* volser transaction ID */
+  afs_uint32 code;                /* result code */
 };
 
-static u_int32 xf_rxcall_do_read(XFILE *X, void *buf, u_int32 count)
+static afs_uint32 xf_rxcall_do_read(XFILE *X, void *buf, afs_uint32 count)
 {
   struct rxinfo *i = X->refcon;
-  u_int32 xcount;
+  afs_uint32 xcount;
 
   xcount = rx_Read(i->call, buf, count);
   if (xcount == count) return 0;
@@ -70,10 +75,10 @@ static u_int32 xf_rxcall_do_read(XFILE *X, void *buf, u_int32 count)
 }
 
 
-static u_int32 xf_rxcall_do_write(XFILE *X, void *buf, u_int32 count)
+static afs_uint32 xf_rxcall_do_write(XFILE *X, void *buf, afs_uint32 count)
 {
   struct rxinfo *i = X->refcon;
-  u_int32 xcount;
+  afs_uint32 xcount;
 
   xcount = rx_Write(i->call, buf, count);
   if (xcount == count) return 0;
@@ -83,10 +88,10 @@ static u_int32 xf_rxcall_do_write(XFILE *X, void *buf, u_int32 count)
 }
 
 
-static u_int32 xf_rxcall_do_close(XFILE *X)
+static afs_uint32 xf_rxcall_do_close(XFILE *X)
 {
   struct rxinfo *i = X->refcon;
-  u_int32 code;
+  afs_uint32 code;
 
   if (i->call) {
     code = rx_EndCall(i->call, i->code);
@@ -99,12 +104,12 @@ static u_int32 xf_rxcall_do_close(XFILE *X)
 }
 
 
-static u_int32 xf_voldump_do_close(XFILE *X)
+static afs_uint32 xf_voldump_do_close(XFILE *X)
 {
   struct rxinfo *i = X->refcon;
   struct rx_connection *conn = i->conn;
-  u_int32 code, rcode, xcode;
-  int32 tid = i->tid;
+  afs_uint32 code, rcode, xcode;
+  afs_int32 tid = i->tid;
 
   code = xf_rxcall_do_close(X);
   xcode = AFSVolEndTrans(conn, tid, &rcode);
@@ -113,7 +118,7 @@ static u_int32 xf_voldump_do_close(XFILE *X)
 }
 
 
-u_int32 xfopen_rxcall(XFILE *X, int flag, struct rx_call *call)
+afs_uint32 xfopen_rxcall(XFILE *X, int flag, struct rx_call *call)
 {
   struct rxinfo *i;
 
@@ -132,13 +137,13 @@ u_int32 xfopen_rxcall(XFILE *X, int flag, struct rx_call *call)
 }
 
 
-u_int32 xfopen_voldump(XFILE *X, struct rx_connection *conn,
-                       int32 part, int32 volid, int32 date)
+afs_uint32 xfopen_voldump(XFILE *X, struct rx_connection *conn,
+                       afs_int32 part, afs_int32 volid, afs_int32 date)
 {
   struct rx_call *call;
   struct rxinfo *i;
-  u_int32 code, rcode;
-  int32 tid;
+  afs_uint32 code, rcode;
+  afs_int32 tid;
 
   if (code = AFSVolTransCreate(conn, volid, part, ITBusy, &tid)) return code;
   call = rx_NewCall(conn);
@@ -157,7 +162,7 @@ u_int32 xfopen_voldump(XFILE *X, struct rx_connection *conn,
 }
 
 
-u_int32 xfon_voldump(XFILE *X, int flag, char *name)
+afs_uint32 xfon_voldump(XFILE *X, int flag, char *name)
 {
   struct hostent *he;
   struct rx_securityClass *class;
@@ -165,8 +170,8 @@ u_int32 xfon_voldump(XFILE *X, int flag, char *name)
   struct ktc_principal sname;
   struct ktc_token token;
   struct afsconf_dir *confdir;
-  u_int32 code, server_addr;
-  int32 volid, partid, date;
+  afs_uint32 code, server_addr;
+  afs_int32 volid, partid, date;
   int isnum, index;
   char *x, *y;
 

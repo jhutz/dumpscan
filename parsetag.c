@@ -54,12 +54,12 @@
  */
 
 /* Parse a file containing tagged data and attributes **/
-u_int32 ParseTaggedData(XFILE *X, tagged_field *fields, unsigned char *tag,
+afs_uint32 ParseTaggedData(XFILE *X, tagged_field *fields, unsigned char *tag,
                     tag_parse_info *pi, void *g_refcon, void *l_refcon)
 {
   int i = -1;
-  u_int32 r, val;
-  u_int16 val16;
+  afs_uint32 r, val;
+  afs_uint16 val16;
   unsigned char val8;
   unsigned char *strval;
 

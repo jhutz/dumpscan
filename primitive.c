@@ -39,23 +39,23 @@
 #define BUFSIZE 256
 
 
-u_int32 ReadByte(XFILE *X, unsigned char *val)
+afs_uint32 ReadByte(XFILE *X, unsigned char *val)
 {
   return xfread(X, val, 1);
 }
 
-u_int32 ReadInt16(XFILE *X, u_int16 *val)
+afs_uint32 ReadInt16(XFILE *X, afs_uint16 *val)
 {
-  u_int32 r;
+  afs_uint32 r;
 
   if (r = xfread(X, val, 2)) return r;
   *val = ntohs(*val);
   return 0;
 }
 
-u_int32 ReadInt32(XFILE *X, u_int32 *val)
+afs_uint32 ReadInt32(XFILE *X, afs_uint32 *val)
 {
-  u_int32 r;
+  afs_uint32 r;
 
   if (r = xfread(X, val, 4)) return r;
   *val = ntohl(*val);
@@ -66,11 +66,11 @@ u_int32 ReadInt32(XFILE *X, u_int32 *val)
  * has the advantage that it reads the data stream only once, doesn't
  * read anything extra, and never has to seek on the data stream.
  */
-u_int32 ReadString(XFILE *X, unsigned char **val)
+afs_uint32 ReadString(XFILE *X, unsigned char **val)
 {
   static unsigned char buf[BUFSIZE];
   unsigned char *result = 0;
-  u_int32 r;
+  afs_uint32 r;
   int i, l = 0;
 
   *val = 0;
@@ -95,24 +95,24 @@ u_int32 ReadString(XFILE *X, unsigned char **val)
 }
 
 
-u_int32 WriteByte(XFILE *X, unsigned char val)
+afs_uint32 WriteByte(XFILE *X, unsigned char val)
 {
   return xfwrite(X, &val, 1);
 }
 
-u_int32 WriteInt16(XFILE *X, u_int16 val)
+afs_uint32 WriteInt16(XFILE *X, afs_uint16 val)
 {
   val = htons(val);
   return xfwrite(X, &val, 2);
 }
 
-u_int32 WriteInt32(XFILE *X, u_int32 val)
+afs_uint32 WriteInt32(XFILE *X, afs_uint32 val)
 {
   val = htonl(val);
   return xfwrite(X, &val, 4);
 }
 
-u_int32 WriteString(XFILE *X, unsigned char *str)
+afs_uint32 WriteString(XFILE *X, unsigned char *str)
 {
   int len = strlen((char *)str) + 1;
   return xfwrite(X, str, len);

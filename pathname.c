@@ -39,7 +39,7 @@
 #define vnode_hash(phi,vnode) ((vnode) & ((1 << (phi)->hash_size) - 1))
 
 
-static vhash_ent *get_vhash_ent(path_hashinfo *phi, u_int32 vnode, int make)
+static vhash_ent *get_vhash_ent(path_hashinfo *phi, afs_uint32 vnode, int make)
 {
   int key = vnode_hash(phi, vnode);
   vhash_ent *vhe;
@@ -60,7 +60,7 @@ static vhash_ent *get_vhash_ent(path_hashinfo *phi, u_int32 vnode, int make)
 }
 
 
-static u_int32 volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
+static afs_uint32 volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
 {
   path_hashinfo *phi = (path_hashinfo *)refcon;
   int nfiles, hsize;
@@ -84,7 +84,7 @@ static u_int32 volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
 }
 
 
-static u_int32 vnode_keep(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 vnode_keep(afs_vnode *v, XFILE *X, void *refcon)
 {
   path_hashinfo *phi = (path_hashinfo *)refcon;
   vhash_ent *vhe;
@@ -112,7 +112,7 @@ static u_int32 vnode_keep(afs_vnode *v, XFILE *X, void *refcon)
 }
 
 
-static u_int32 vnode_stop(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 vnode_stop(afs_vnode *v, XFILE *X, void *refcon)
 {
   path_hashinfo *phi = (path_hashinfo *)refcon;
   int r;
@@ -124,7 +124,7 @@ static u_int32 vnode_stop(afs_vnode *v, XFILE *X, void *refcon)
 }
 
 
-static u_int32 dirent_cb(afs_vnode *v, afs_dir_entry *de,
+static afs_uint32 dirent_cb(afs_vnode *v, afs_dir_entry *de,
                          XFILE *X, void *refcon)
 {
   path_hashinfo *phi = (path_hashinfo *)refcon;
@@ -147,7 +147,7 @@ static u_int32 dirent_cb(afs_vnode *v, afs_dir_entry *de,
 /* Prescan the vnodes in a dump file, collecting information that will
  * be useful in generating and following pathnames.  
  */
-u_int32 Path_PreScan(XFILE *X, path_hashinfo *phi, int full)
+afs_uint32 Path_PreScan(XFILE *X, path_hashinfo *phi, int full)
 {
   dump_parser my_p, *p = phi->p;
   int r;
@@ -199,12 +199,12 @@ void Path_FreeHashTable(path_hashinfo *phi)
 
 
 /* Follow a pathname to the vnode it represents */
-u_int32 Path_Follow(XFILE *X, path_hashinfo *phi,
+afs_uint32 Path_Follow(XFILE *X, path_hashinfo *phi,
                     char *path, vhash_ent *his_vhe)
 {
   vhash_ent *vhe;
   char *name;
-  u_int32 r, vnum = 1;
+  afs_uint32 r, vnum = 1;
 
   if (*path == '/') path++;
   name = strtok(path, "/");
@@ -257,13 +257,13 @@ u_int32 Path_Follow(XFILE *X, path_hashinfo *phi,
 }
 
 
-u_int32 Path_Build(XFILE *X, path_hashinfo *phi, u_int32 vnode,
+afs_uint32 Path_Build(XFILE *X, path_hashinfo *phi, afs_uint32 vnode,
                    char **his_path, int fast)
 {
   vhash_ent *vhe;
   char *name, *path = 0, fastbuf[12];
   char *x, *y;
-  u_int32 parent, r;
+  afs_uint32 parent, r;
   int nl, pl = 0;
 
   if (vnode == 1) {

@@ -32,10 +32,10 @@
 #include "dumpscan_errs.h"
 #include "dumpfmt.h"
 
-static u_int32 store_volhdr   (XFILE *, unsigned char *, tagged_field *,
-                               u_int32, tag_parse_info *, void *, void *);
-static u_int32 parse_weekuse  (XFILE *, unsigned char *, tagged_field *,
-                               u_int32, tag_parse_info *, void *, void *);
+static afs_uint32 store_volhdr   (XFILE *, unsigned char *, tagged_field *,
+                               afs_uint32, tag_parse_info *, void *, void *);
+static afs_uint32 parse_weekuse  (XFILE *, unsigned char *, tagged_field *,
+                               afs_uint32, tag_parse_info *, void *, void *);
 
 /** Field list for volume headers **/
 static tagged_field volhdr_fields[] = {
@@ -70,14 +70,14 @@ static tagged_field volhdr_fields[] = {
 /* Parse a volume header, including any tagged attributes, and call the
  * volume-header callback, if one is defined.
  */
-u_int32 parse_volhdr(XFILE *X, unsigned char *tag, tagged_field *field,
-                     u_int32 value, tag_parse_info *pi,
+afs_uint32 parse_volhdr(XFILE *X, unsigned char *tag, tagged_field *field,
+                     afs_uint32 value, tag_parse_info *pi,
                      void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   afs_vol_header hdr;
   u_int64 where;
-  u_int32 r;
+  afs_uint32 r;
 
   memset(&hdr, 0, sizeof(hdr));
   if (r = xftell(X, &where)) return r;
@@ -109,14 +109,14 @@ u_int32 parse_volhdr(XFILE *X, unsigned char *tag, tagged_field *field,
 
 
 /* Store data in a volume header */
-static u_int32 store_volhdr(XFILE *X, unsigned char *tag, tagged_field *field,
-                            u_int32 value, tag_parse_info *pi,
+static afs_uint32 store_volhdr(XFILE *X, unsigned char *tag, tagged_field *field,
+                            afs_uint32 value, tag_parse_info *pi,
                             void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   afs_vol_header *hdr = (afs_vol_header *)l_refcon;
   time_t when;
-  u_int32 r = 0;
+  afs_uint32 r = 0;
 
   switch (field->tag) {
   case VHTAG_VOLID:
@@ -272,14 +272,14 @@ static u_int32 store_volhdr(XFILE *X, unsigned char *tag, tagged_field *field,
 
 
 /* Parse and store the week use data from a volume header */
-static u_int32 parse_weekuse(XFILE *X, unsigned char *tag, tagged_field *field,
-                             u_int32 value, tag_parse_info *pi,
+static afs_uint32 parse_weekuse(XFILE *X, unsigned char *tag, tagged_field *field,
+                             afs_uint32 value, tag_parse_info *pi,
                              void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   afs_vol_header *hdr = (afs_vol_header *)l_refcon;
-  u_int16 count;
-  u_int32 r;
+  afs_uint16 count;
+  afs_uint32 r;
   unsigned int i;
 
   if (r = ReadInt16(X, &count)) return r;

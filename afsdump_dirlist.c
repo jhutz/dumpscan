@@ -93,7 +93,7 @@ static void parse_options(int argc, char **argv)
 
 
 /* A callback to count and print errors */
-static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
+static afs_uint32 my_error_cb(afs_uint32 code, int fatal, void *ref, char *msg, ...)
 {
   va_list alist;
 
@@ -110,7 +110,7 @@ static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
 void main(int argc, char **argv)
 {
   XFILE input_file;
-  u_int32 r;
+  afs_uint32 r;
 
   parse_options(argc, argv);
   initialize_acfg_error_table();

@@ -34,14 +34,14 @@
 #include "internal.h"
 #include "stagehdr.h"
 
-static u_int32 parse_dumphdr  (XFILE *, unsigned char *, tagged_field *,
-                               u_int32, tag_parse_info *, void *, void *);
-static u_int32 parse_dumpend  (XFILE *, unsigned char *, tagged_field *,
-                               u_int32, tag_parse_info *, void *, void *);
-static u_int32 store_dumphdr  (XFILE *, unsigned char *, tagged_field *,
-                               u_int32, tag_parse_info *, void *, void *);
-static u_int32 parse_dumptimes(XFILE *, unsigned char *, tagged_field *,
-                               u_int32, tag_parse_info *, void *, void *);
+static afs_uint32 parse_dumphdr  (XFILE *, unsigned char *, tagged_field *,
+                               afs_uint32, tag_parse_info *, void *, void *);
+static afs_uint32 parse_dumpend  (XFILE *, unsigned char *, tagged_field *,
+                               afs_uint32, tag_parse_info *, void *, void *);
+static afs_uint32 store_dumphdr  (XFILE *, unsigned char *, tagged_field *,
+                               afs_uint32, tag_parse_info *, void *, void *);
+static afs_uint32 parse_dumptimes(XFILE *, unsigned char *, tagged_field *,
+                               afs_uint32, tag_parse_info *, void *, void *);
 
 /** Field list for top-level objects **/
 static tagged_field top_fields[] = {
@@ -64,14 +64,14 @@ static tagged_field dumphdr_fields[] = {
 /* Parse a dump header, including its tagged attributes, and call the
  * dump-header callback, if one is defined.
  */
-static u_int32 parse_dumphdr(XFILE *X, unsigned char *tag, tagged_field *field,
-                             u_int32 value, tag_parse_info *pi,
+static afs_uint32 parse_dumphdr(XFILE *X, unsigned char *tag, tagged_field *field,
+                             afs_uint32 value, tag_parse_info *pi,
                              void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   afs_dump_header hdr;
   u_int64 where;
-  u_int32 r;
+  afs_uint32 r;
 
   memset(&hdr, 0, sizeof(hdr));
   if (r = xftell(X, &where)) return r;
@@ -119,8 +119,8 @@ static u_int32 parse_dumphdr(XFILE *X, unsigned char *tag, tagged_field *field,
 
 
 /* Store tagged attributes into a dump header */
-static u_int32 store_dumphdr(XFILE *X, unsigned char *tag, tagged_field *field,
-                             u_int32 value, tag_parse_info *pi,
+static afs_uint32 store_dumphdr(XFILE *X, unsigned char *tag, tagged_field *field,
+                             afs_uint32 value, tag_parse_info *pi,
                              void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
@@ -152,15 +152,15 @@ static u_int32 store_dumphdr(XFILE *X, unsigned char *tag, tagged_field *field,
 
 
 /* Parse and store the dump time range from a dump header */
-static u_int32 parse_dumptimes(XFILE *X, unsigned char *tag,
-                               tagged_field *field, u_int32 value,
+static afs_uint32 parse_dumptimes(XFILE *X, unsigned char *tag,
+                               tagged_field *field, afs_uint32 value,
                                tag_parse_info *pi,
                                void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
   afs_dump_header *hdr = (afs_dump_header *)l_refcon;
-  u_int16 count;
-  u_int32 r;
+  afs_uint16 count;
+  afs_uint32 r;
 
   if (r = ReadInt16(X, &count)) return r;
   if (count != 2) {
@@ -180,12 +180,12 @@ static u_int32 parse_dumptimes(XFILE *X, unsigned char *tag,
 
 
 /* Parse a dump_end record */
-static u_int32 parse_dumpend(XFILE *X, unsigned char *tag, tagged_field *field,
-                             u_int32 value, tag_parse_info *pi,
+static afs_uint32 parse_dumpend(XFILE *X, unsigned char *tag, tagged_field *field,
+                             afs_uint32 value, tag_parse_info *pi,
                              void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
-  u_int32 r;
+  afs_uint32 r;
 
   if (value != DUMPENDMAGIC) {
     if (p->cb_error)
@@ -201,11 +201,11 @@ static u_int32 parse_dumpend(XFILE *X, unsigned char *tag, tagged_field *field,
 
 
 
-u_int32 ParseDumpFile(XFILE *X, dump_parser *p)
+afs_uint32 ParseDumpFile(XFILE *X, dump_parser *p)
 {
   tag_parse_info pi;
   unsigned char tag;
-  u_int32 r;
+  afs_uint32 r;
 
   prep_pi(p, &pi);
   r = ParseTaggedData(X, top_fields, &tag, &pi, (void *)p, 0);
@@ -213,11 +213,11 @@ u_int32 ParseDumpFile(XFILE *X, dump_parser *p)
 }
 
 
-u_int32 ParseDumpHeader(XFILE *X, dump_parser *p)
+afs_uint32 ParseDumpHeader(XFILE *X, dump_parser *p)
 {
   tag_parse_info pi;
   unsigned char tag;
-  u_int32 r;
+  afs_uint32 r;
 
   prep_pi(p, &pi);
   if (r = ReadByte(X, &tag)) return handle_return(r, X, tag, p);
@@ -228,11 +228,11 @@ u_int32 ParseDumpHeader(XFILE *X, dump_parser *p)
 }
 
 
-u_int32 ParseVolumeHeader(XFILE *X, dump_parser *p)
+afs_uint32 ParseVolumeHeader(XFILE *X, dump_parser *p)
 {
   tag_parse_info pi;
   unsigned char tag;
-  u_int32 r;
+  afs_uint32 r;
 
   prep_pi(p, &pi);
   if (r = ReadByte(X, &tag)) return handle_return(r, X, tag, p);
@@ -243,11 +243,11 @@ u_int32 ParseVolumeHeader(XFILE *X, dump_parser *p)
 }
 
 
-u_int32 ParseVNode(XFILE *X, dump_parser *p)
+afs_uint32 ParseVNode(XFILE *X, dump_parser *p)
 {
   tag_parse_info pi;
   unsigned char tag;
-  u_int32 r;
+  afs_uint32 r;
 
   prep_pi(p, &pi);
   if (r = ReadByte(X, &tag)) return handle_return(r, X, tag, p);

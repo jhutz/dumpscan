@@ -57,12 +57,12 @@ static void fixup(char *name, int l)
   }
 }
 
-u_int32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
-                        u_int32 size, int toeof)
+afs_uint32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
+                        afs_uint32 size, int toeof)
 {
   afs_dir_entry de;
   int pgno, i, j, l, n;
-  u_int32 r;
+  afs_uint32 r;
   u_int64 where;
 
   if (p->print_flags & DSPRINT_DIR) {
@@ -123,9 +123,9 @@ u_int32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
 }
 
 
-u_int32 ParseDirectory(XFILE *X, dump_parser *p, u_int32 size, int toeof)
+afs_uint32 ParseDirectory(XFILE *X, dump_parser *p, afs_uint32 size, int toeof)
 {
-  u_int32 r;
+  afs_uint32 r;
 
   r = parse_directory(X, p, 0, size, toeof);
 }
@@ -133,12 +133,12 @@ u_int32 ParseDirectory(XFILE *X, dump_parser *p, u_int32 size, int toeof)
 
 typedef struct {
   char **name;
-  u_int32 *vnode;
-  u_int32 *vuniq;
+  afs_uint32 *vnode;
+  afs_uint32 *vuniq;
 } dirlookup_stat;
 
 
-static u_int32 dirlookup_cb(afs_vnode *v, afs_dir_entry *de,
+static afs_uint32 dirlookup_cb(afs_vnode *v, afs_dir_entry *de,
                             XFILE *X, void *refcon)
 {
   dirlookup_stat *s = (dirlookup_stat *)refcon;
@@ -171,12 +171,12 @@ static u_int32 dirlookup_cb(afs_vnode *v, afs_dir_entry *de,
  * and size set to the length of the directory.
  * Returns 0 on success, whether or not the entry is found.
  */
-u_int32 DirectoryLookup(XFILE *X, dump_parser *p, u_int32 size,
-                    char **name, u_int32 *vnode, u_int32 *vuniq)
+afs_uint32 DirectoryLookup(XFILE *X, dump_parser *p, afs_uint32 size,
+                    char **name, afs_uint32 *vnode, afs_uint32 *vuniq)
 {
   dump_parser my_p;
   dirlookup_stat my_s;
-  u_int32 r;
+  afs_uint32 r;
 
   memset(&my_s, 0, sizeof(my_s));
   my_s.name  = name;

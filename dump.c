@@ -33,9 +33,9 @@
 
 #define COPYBUFSIZE 65536
 
-u_int32 DumpDumpHeader(XFILE *OX, afs_dump_header *hdr)
+afs_uint32 DumpDumpHeader(XFILE *OX, afs_dump_header *hdr)
 {
-  u_int32 r;
+  afs_uint32 r;
 
   if (r = WriteByte(OX, TAG_DUMPHEADER)) return r;
   if (r = WriteInt32(OX, hdr->magic)) return r;
@@ -63,9 +63,9 @@ u_int32 DumpDumpHeader(XFILE *OX, afs_dump_header *hdr)
 }
 
 
-u_int32 DumpVolumeHeader(XFILE *OX, afs_vol_header *hdr)
+afs_uint32 DumpVolumeHeader(XFILE *OX, afs_vol_header *hdr)
 {
-  u_int32 r;
+  afs_uint32 r;
   int i;
 
   if (r = WriteByte(OX, TAG_VOLHEADER)) return r;
@@ -176,9 +176,9 @@ u_int32 DumpVolumeHeader(XFILE *OX, afs_vol_header *hdr)
 }
 
 
-u_int32 DumpVNode(XFILE *OX, afs_vnode *v)
+afs_uint32 DumpVNode(XFILE *OX, afs_vnode *v)
 {
-  u_int32 r;
+  afs_uint32 r;
 
   if (r = WriteByte(OX, TAG_VNODE)) return r;
   if (r = WriteInt32(OX, v->vnode)) return r;
@@ -233,9 +233,9 @@ u_int32 DumpVNode(XFILE *OX, afs_vnode *v)
 }
 
 
-u_int32 DumpVNodeData(XFILE *OX, char *buf, u_int32 size)
+afs_uint32 DumpVNodeData(XFILE *OX, char *buf, afs_uint32 size)
 {
-  u_int32 r;
+  afs_uint32 r;
 
   if (r = WriteByte(OX, VTAG_DATA)) return r;
   if (r = WriteInt32(OX, size)) return r;
@@ -244,9 +244,9 @@ u_int32 DumpVNodeData(XFILE *OX, char *buf, u_int32 size)
 }
 
 
-u_int32 CopyVNodeData(XFILE *OX, XFILE *X, u_int32 size)
+afs_uint32 CopyVNodeData(XFILE *OX, XFILE *X, afs_uint32 size)
 {
-  u_int32 r, n;
+  afs_uint32 r, n;
   static char buf[COPYBUFSIZE];
 
   if (r = WriteByte(OX, VTAG_DATA)) return r;
@@ -261,8 +261,8 @@ u_int32 CopyVNodeData(XFILE *OX, XFILE *X, u_int32 size)
 }
 
 
-u_int32 DumpDumpEnd(XFILE *OX) {
-  u_int32 r;
+afs_uint32 DumpDumpEnd(XFILE *OX) {
+  afs_uint32 r;
 
   if (r = WriteByte(OX, TAG_DUMPEND)) return r;
   if (r = WriteInt32(OX, DUMPENDMAGIC)) return r;

@@ -32,11 +32,11 @@
 /* intNN.h - Sized integer types */
 #include <afs/stds.h>
 #if 0
-typedef short int16;
-typedef unsigned short u_int16;
+typedef short afs_int16;
+typedef unsigned short afs_uint16;
 
-typedef long int32;
-typedef unsigned long u_int32;
+typedef long afs_int32;
+typedef unsigned long afs_uint32;
 #endif
 
 
@@ -54,8 +54,8 @@ typedef unsigned NATIVE_INT64 u_int64;
 /* construct/extract/assign */
 #define mk64(X,H,L) ((X) = ( ((u_int64)(H) << 32) \
                            | ((u_int64)(L) & 0xffffffff)))
-#define hi64(Y)     ((u_int32)(((Y) >> 32) & 0xffffffff))
-#define lo64(Y)     ((u_int32)((Y) & 0xffffffff))
+#define hi64(Y)     ((afs_uint32)(((Y) >> 32) & 0xffffffff))
+#define lo64(Y)     ((afs_uint32)((Y) & 0xffffffff))
 #define ex64(Y,H,L) ((H) = hi64(Y), (L) = lo64(Y))
 #define cp64(X,Y)   ((X) = (Y))
 #define get64(X)    (X)
@@ -87,7 +87,7 @@ typedef unsigned NATIVE_INT64 u_int64;
 
 #else /* !NATIVE_INT64 */
 /** We have to provide our own 64-bit integers **/
-typedef struct { u_int32 hi, lo; } u_int64;
+typedef struct { afs_uint32 hi, lo; } u_int64;
 
 /* construct/extract/assign */
 #define mk64(X,H,L) ((X).hi = (H), (X).lo = (L))

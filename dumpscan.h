@@ -37,13 +37,14 @@
 #include <lock.h>
 #include <afs/afsint.h>
 #include <afs/nfs.h>
+#include <afs/ihandle.h>
 #include <afs/vnode.h>
 
 /* Random useful types */
 typedef struct tagged_field tagged_field;
 typedef struct tag_parse_info tag_parse_info;
-typedef u_int32 (*tag_parser)(XFILE *, unsigned char *, tagged_field *,
-                              u_int32, tag_parse_info *, void *, void *);
+typedef afs_uint32 (*tag_parser)(XFILE *, unsigned char *, tagged_field *,
+                              afs_uint32, tag_parse_info *, void *, void *);
 
 /* Error codes used within dumpscan.
  * Any of the routines declared below, or callbacks used by them,
@@ -67,20 +68,20 @@ typedef u_int32 (*tag_parser)(XFILE *, unsigned char *, tagged_field *,
  * functions should extract as much data as possible from the actual file
  * to fill this in. */
 typedef struct {
-  u_int32 version;
-  u_int32 from_date;
-  u_int32 to_date;
-  u_int32 dump_date;
-  u_int32 filenum;
+  afs_uint32 version;
+  afs_uint32 from_date;
+  afs_uint32 to_date;
+  afs_uint32 dump_date;
+  afs_uint32 filenum;
   unsigned char *server;
   unsigned char *part;
   unsigned char *volname;
-  u_int32 volid;
-  u_int32 dumplen;
-  u_int32 level;
-  u_int32 magic;
-  u_int32 cksum;
-  u_int32 flags;
+  afs_uint32 volid;
+  afs_uint32 dumplen;
+  afs_uint32 level;
+  afs_uint32 magic;
+  afs_uint32 cksum;
+  afs_uint32 flags;
 } backup_system_header;
 
 
@@ -91,13 +92,13 @@ typedef struct {
 #define F_DUMPHDR_TO          0x00000008
 typedef struct {
   u_int64 offset;           /* Where in the file is it? */
-  u_int32 field_mask;       /* What fields are present? */
-  u_int32 magic;            /* Magic number */
-  u_int32 version;          /* Dump format version */
-  u_int32 volid;            /* VolID of volume in dump */
+  afs_uint32 field_mask;       /* What fields are present? */
+  afs_uint32 magic;            /* Magic number */
+  afs_uint32 version;          /* Dump format version */
+  afs_uint32 volid;            /* VolID of volume in dump */
   unsigned char *volname;   /* Name of volume in dump */
-  u_int32 from_date;        /* Reference date */
-  u_int32 to_date;          /* Date of dump */
+  afs_uint32 from_date;        /* Reference date */
+  afs_uint32 to_date;          /* Date of dump */
 } afs_dump_header;
 
 
@@ -129,32 +130,32 @@ typedef struct {
 #define F_VOLHDR_DAYUSE_DATE  0x01000000
 typedef struct {
   u_int64 offset;           /* Where in the file is it? */
-  u_int32 field_mask;       /* What fields are present? */
-  u_int32 volid;            /* Volume ID */
-  u_int32 volvers;          /* ?? */
+  afs_uint32 field_mask;       /* What fields are present? */
+  afs_uint32 volid;            /* Volume ID */
+  afs_uint32 volvers;          /* ?? */
   unsigned char *volname;   /* Volume Name */
   int     flag_inservice;   /* Inservice flag (0 or not) */
   int     flag_blessed;     /* Blessed to come online (0 or not) */
-  u_int32 voluniq;          /* Volume uniquifier */
+  afs_uint32 voluniq;          /* Volume uniquifier */
   int     voltype;          /* Volume type */
-  u_int32 parent_volid;     /* Parent volume ID */
-  u_int32 clone_volid;      /* Clone volume ID */
-  u_int32 maxquota;         /* Max quota */
-  u_int32 minquota;         /* Min quota (obsolete) */
-  u_int32 diskused;         /* Disk blocks used */
-  u_int32 nfiles;           /* Number of files in volume */
-  u_int32 account_no;       /* Account number (unused) */
-  u_int32 owner;            /* Volume owner */
-  u_int32 create_date;      /* Creation date of this copy */
-  u_int32 access_date;      /* Last access */
-  u_int32 update_date;      /* Last modification */
-  u_int32 expire_date;      /* Expiration (unused) */
-  u_int32 backup_date;      /* Last backup clone */
+  afs_uint32 parent_volid;     /* Parent volume ID */
+  afs_uint32 clone_volid;      /* Clone volume ID */
+  afs_uint32 maxquota;         /* Max quota */
+  afs_uint32 minquota;         /* Min quota (obsolete) */
+  afs_uint32 diskused;         /* Disk blocks used */
+  afs_uint32 nfiles;           /* Number of files in volume */
+  afs_uint32 account_no;       /* Account number (unused) */
+  afs_uint32 owner;            /* Volume owner */
+  afs_uint32 create_date;      /* Creation date of this copy */
+  afs_uint32 access_date;      /* Last access */
+  afs_uint32 update_date;      /* Last modification */
+  afs_uint32 expire_date;      /* Expiration (unused) */
+  afs_uint32 backup_date;      /* Last backup clone */
   unsigned char *offline_msg; /* Offline message */
   unsigned char *motd_msg;    /* Volume MOTD */
-  u_int32 weekuse[7];       /* Weekuse data */
-  u_int32 dayuse;           /* # accesses in last day */
-  u_int32 dayuse_date;      /* Date for which dayuse is valid */
+  afs_uint32 weekuse[7];       /* Weekuse data */
+  afs_uint32 dayuse;           /* # accesses in last day */
+  afs_uint32 dayuse_date;      /* Date for which dayuse is valid */
 } afs_vol_header;
 
 
@@ -174,20 +175,20 @@ typedef struct {
 #define F_VNODE_ACL           0x00000400
 typedef struct {
   u_int64 offset;           /* Where in the file is it? */
-  u_int32 field_mask;       /* What fields are present? */
-  u_int32 vnode;            /* Vnode number */
-  u_int32 vuniq;            /* Uniquifier */
+  afs_uint32 field_mask;       /* What fields are present? */
+  afs_uint32 vnode;            /* Vnode number */
+  afs_uint32 vuniq;            /* Uniquifier */
   int     type;             /* Vnode type */
-  u_int16 nlinks;           /* Number of links (should be in 1 dir!) */
-  u_int32 parent;           /* Parent vnode */
-  u_int32 datavers;         /* Data version */
-  u_int32 author;           /* Last writer */
-  u_int32 owner;            /* Owner UID */
-  u_int32 group;            /* Owning group */
-  u_int16 mode;             /* UNIX mode bits */
-  u_int32 client_date;      /* Last modified date from client */
-  u_int32 server_date;      /* Last modified date on server */
-  u_int32 size;             /* Size of data */
+  afs_uint16 nlinks;           /* Number of links (should be in 1 dir!) */
+  afs_uint32 parent;           /* Parent vnode */
+  afs_uint32 datavers;         /* Data version */
+  afs_uint32 author;           /* Last writer */
+  afs_uint32 owner;            /* Owner UID */
+  afs_uint32 group;            /* Owning group */
+  afs_uint16 mode;             /* UNIX mode bits */
+  afs_uint32 client_date;      /* Last modified date from client */
+  afs_uint32 server_date;      /* Last modified date on server */
+  afs_uint32 size;             /* Size of data */
   u_int64 d_offset;         /* Where in the file is the data? */
   unsigned char acl[SIZEOF_LARGEDISKVNODE - SIZEOF_SMALLDISKVNODE];
 } afs_vnode;
@@ -197,8 +198,8 @@ typedef struct {
 typedef struct {
   int  slot;                /* Directory slot # (info only) */
   char *name;               /* Name of entry */
-  u_int32 vnode;            /* Vnode number */
-  u_int32 uniq;             /* Uniquifier */
+  afs_uint32 vnode;            /* Vnode number */
+  afs_uint32 uniq;             /* Uniquifier */
 } afs_dir_entry;
 
 
@@ -218,8 +219,8 @@ typedef struct {
 #define DKIND_MASK     (~0x0f)
 struct tag_parse_info {
   void *err_refcon;
-  u_int32 (*cb_error)(u_int32, int, void *, char *, ...);
-  u_int32 flags;
+  afs_uint32 (*cb_error)(afs_uint32, int, void *, char *, ...);
+  afs_uint32 flags;
 #define TPFLAG_SKIP   0x0001
 #define TPFLAG_RSKIP  0x0002
   int shift_offset;
@@ -250,22 +251,22 @@ typedef struct {
    * make a copy if you want one.
    */
   void *refcon;
-  u_int32 (*cb_bckhdr)(backup_system_header *, XFILE *, void *); /* Backup   */
-  u_int32 (*cb_dumphdr)(afs_dump_header *, XFILE *, void *); /* Dump hdr     */
-  u_int32 (*cb_volhdr)(afs_vol_header *, XFILE *, void *);   /* Volume hdr   */
-  u_int32 (*cb_vnode_dir)(afs_vnode *, XFILE *, void *);     /* Directory    */
-  u_int32 (*cb_vnode_file)(afs_vnode *, XFILE *, void *);    /* File         */
-  u_int32 (*cb_vnode_link)(afs_vnode *, XFILE *, void *);    /* Symlink      */
-  u_int32 (*cb_vnode_empty)(afs_vnode *, XFILE *, void *);   /* vnode+uniq   */
-  u_int32 (*cb_vnode_wierd)(afs_vnode *, XFILE *, void *);   /* Unknown type */
+  afs_uint32 (*cb_bckhdr)(backup_system_header *, XFILE *, void *); /* Backup   */
+  afs_uint32 (*cb_dumphdr)(afs_dump_header *, XFILE *, void *); /* Dump hdr     */
+  afs_uint32 (*cb_volhdr)(afs_vol_header *, XFILE *, void *);   /* Volume hdr   */
+  afs_uint32 (*cb_vnode_dir)(afs_vnode *, XFILE *, void *);     /* Directory    */
+  afs_uint32 (*cb_vnode_file)(afs_vnode *, XFILE *, void *);    /* File         */
+  afs_uint32 (*cb_vnode_link)(afs_vnode *, XFILE *, void *);    /* Symlink      */
+  afs_uint32 (*cb_vnode_empty)(afs_vnode *, XFILE *, void *);   /* vnode+uniq   */
+  afs_uint32 (*cb_vnode_wierd)(afs_vnode *, XFILE *, void *);   /* Unknown type */
 
   /* This function is called when there is an error in the dump. */
   /* (cb_error)(errno, fatal, refcon, msg_fmt, msg_args...) */
   void *err_refcon; /* If set, use instead of refcon for dir entries */
-  u_int32 (*cb_error)(u_int32, int, void *, char *, ...);
+  afs_uint32 (*cb_error)(afs_uint32, int, void *, char *, ...);
 
   /* This function is called for each directory entry, if set */
-  u_int32 (*cb_dirent)(afs_vnode *, afs_dir_entry *, XFILE *, void *);
+  afs_uint32 (*cb_dirent)(afs_vnode *, afs_dir_entry *, XFILE *, void *);
 
   int flags;            /* Flags and options */
 #define DSFLAG_SEEK     0x0001  /* Input file is seekable */
@@ -289,23 +290,23 @@ typedef struct {
 #define DSFIX_VFSYNC    0x0008  /* Try to resync after bad vnode */
 
   /** Things below this point for internal use only **/
-  u_int32 vol_uniquifier;
+  afs_uint32 vol_uniquifier;
 } dump_parser;
 
 
 /** Hash table and control info for pathname manipulation **/
 typedef struct vhash_ent {
   struct vhash_ent *next;    /* Pointer to next entry */
-  u_int32 vnode;             /* VNode number */
-  u_int32 parent;            /* Parent VNode number */
+  afs_uint32 vnode;             /* VNode number */
+  afs_uint32 parent;            /* Parent VNode number */
   u_int64 v_offset;          /* Offset to start of vnode */
   u_int64 d_offset;          /* Offset to data (0 if none) */
-  u_int32 d_size;            /* Size of data */
+  afs_uint32 d_size;            /* Size of data */
 } vhash_ent;
 typedef struct {
-  u_int32 n_vnodes;          /* Number of vnodes in volume */
-  u_int32 n_dirs;            /* Number of file vnodes */
-  u_int32 n_files;           /* Number of directory vnodes */
+  afs_uint32 n_vnodes;          /* Number of vnodes in volume */
+  afs_uint32 n_dirs;            /* Number of file vnodes */
+  afs_uint32 n_files;           /* Number of directory vnodes */
   int hash_size;             /* Hash table size (bits) */
   vhash_ent **hash_table;    /* Hash table */
   dump_parser *p;            /* Dump parser to use */
@@ -317,49 +318,49 @@ typedef struct {
 /** Maybe someday, I'll write man pages for these **/
 
 /* primitive.c - I/O primitives */
-extern u_int32 ReadByte(XFILE *, unsigned char *);
-extern u_int32 ReadInt16(XFILE *, u_int16 *);
-extern u_int32 ReadInt32(XFILE *, u_int32 *);
-extern u_int32 ReadString(XFILE *, unsigned char **);
-extern u_int32 WriteByte(XFILE *, unsigned char);
-extern u_int32 WriteInt16(XFILE *, u_int16);
-extern u_int32 WriteInt32(XFILE *, u_int32);
-extern u_int32 WriteString(XFILE *, unsigned char *);
+extern afs_uint32 ReadByte(XFILE *, unsigned char *);
+extern afs_uint32 ReadInt16(XFILE *, afs_uint16 *);
+extern afs_uint32 ReadInt32(XFILE *, afs_uint32 *);
+extern afs_uint32 ReadString(XFILE *, unsigned char **);
+extern afs_uint32 WriteByte(XFILE *, unsigned char);
+extern afs_uint32 WriteInt16(XFILE *, afs_uint16);
+extern afs_uint32 WriteInt32(XFILE *, afs_uint32);
+extern afs_uint32 WriteString(XFILE *, unsigned char *);
 
 /* parsetag.c - Parse tagged data */
-extern u_int32 ParseTaggedData(XFILE *, tagged_field *, unsigned char *,
+extern afs_uint32 ParseTaggedData(XFILE *, tagged_field *, unsigned char *,
                            tag_parse_info *, void *, void *);
 
 /* stagehdr.c - Parse and dump Stage dump headers */
-extern u_int32 ParseStageHdr(XFILE *, unsigned char *, backup_system_header *);
-extern u_int32 DumpStagehdr(XFILE *, backup_system_header *);
+extern afs_uint32 ParseStageHdr(XFILE *, unsigned char *, backup_system_header *);
+extern afs_uint32 DumpStagehdr(XFILE *, backup_system_header *);
 
 /* backuphdr.c - Parse and print backup system headers */
 extern void PrintBackupHdr(backup_system_header *);
 
 /* parsedump.c - Parse all or part of a volume dump */
-extern u_int32 ParseDumpFile(XFILE *, dump_parser *);
-extern u_int32 ParseDumpHeader(XFILE *, dump_parser *);
-extern u_int32 ParseVolumeHeader(XFILE *, dump_parser *);
-extern u_int32 ParseVNode(XFILE *, dump_parser *);
+extern afs_uint32 ParseDumpFile(XFILE *, dump_parser *);
+extern afs_uint32 ParseDumpHeader(XFILE *, dump_parser *);
+extern afs_uint32 ParseVolumeHeader(XFILE *, dump_parser *);
+extern afs_uint32 ParseVNode(XFILE *, dump_parser *);
 
 
 /* directory.c - Directory parsing and lookup */
-extern u_int32 ParseDirectory(XFILE *, dump_parser *, u_int32, int);
-extern u_int32 DirectoryLookup(XFILE *, dump_parser *, u_int32,
-                           char **, u_int32 *, u_int32 *);
+extern afs_uint32 ParseDirectory(XFILE *, dump_parser *, afs_uint32, int);
+extern afs_uint32 DirectoryLookup(XFILE *, dump_parser *, afs_uint32,
+                           char **, afs_uint32 *, afs_uint32 *);
 
 /* dump.c - Dump parts of a volume dump */
-extern u_int32 DumpDumpHeader(XFILE *, afs_dump_header *);
-extern u_int32 DumpVolumeHeader(XFILE *, afs_vol_header *);
-extern u_int32 DumpVNode(XFILE *, afs_vnode *);
-extern u_int32 DumpVnodeData(XFILE *, char *, u_int32);
-extern u_int32 CopyVnodeData(XFILE *, XFILE *, u_int32);
+extern afs_uint32 DumpDumpHeader(XFILE *, afs_dump_header *);
+extern afs_uint32 DumpVolumeHeader(XFILE *, afs_vol_header *);
+extern afs_uint32 DumpVNode(XFILE *, afs_vnode *);
+extern afs_uint32 DumpVnodeData(XFILE *, char *, afs_uint32);
+extern afs_uint32 CopyVnodeData(XFILE *, XFILE *, afs_uint32);
 
 /* pathname.c - Follow and construct pathnames */
-extern u_int32 Path_PreScan(XFILE *, path_hashinfo *, int);
+extern afs_uint32 Path_PreScan(XFILE *, path_hashinfo *, int);
 extern void Path_FreeHashTable(path_hashinfo *);
-extern u_int32 Path_Follow(XFILE *, path_hashinfo *, char *, vhash_ent *);
-extern u_int32 Path_Build(XFILE *, path_hashinfo *, u_int32, char **, int);
+extern afs_uint32 Path_Follow(XFILE *, path_hashinfo *, char *, vhash_ent *);
+extern afs_uint32 Path_Build(XFILE *, path_hashinfo *, afs_uint32, char **, int);
 
 #endif

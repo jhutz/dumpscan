@@ -40,7 +40,7 @@
 
 
 /* do_read for stdio xfiles */
-static u_int32 xf_FILE_do_read(XFILE *X, void *buf, u_int32 count)
+static afs_uint32 xf_FILE_do_read(XFILE *X, void *buf, afs_uint32 count)
 {
   FILE *F = X->refcon;
 
@@ -52,7 +52,7 @@ static u_int32 xf_FILE_do_read(XFILE *X, void *buf, u_int32 count)
 
 
 /* do_write for stdio xfiles */
-static u_int32 xf_FILE_do_write(XFILE *X, void *buf, u_int32 count)
+static afs_uint32 xf_FILE_do_write(XFILE *X, void *buf, afs_uint32 count)
 {
   FILE *F = X->refcon;
 
@@ -64,7 +64,7 @@ static u_int32 xf_FILE_do_write(XFILE *X, void *buf, u_int32 count)
 
 
 /* do_tell for stdio xfiles */
-static u_int32 xf_FILE_do_tell(XFILE *X, u_int64 *offset)
+static afs_uint32 xf_FILE_do_tell(XFILE *X, u_int64 *offset)
 {
   FILE *F = X->refcon;
   off_t where;
@@ -77,7 +77,7 @@ static u_int32 xf_FILE_do_tell(XFILE *X, u_int64 *offset)
 
 
 /* do_seek for stdio xfiles */
-static u_int32 xf_FILE_do_seek(XFILE *X, u_int64 *offset)
+static afs_uint32 xf_FILE_do_seek(XFILE *X, u_int64 *offset)
 {
   FILE *F = X->refcon;
   off_t where = get64(*offset);
@@ -88,7 +88,7 @@ static u_int32 xf_FILE_do_seek(XFILE *X, u_int64 *offset)
 
 
 /* do_skip for stdio xfiles */
-static u_int32 xf_FILE_do_skip(XFILE *X, u_int32 count)
+static afs_uint32 xf_FILE_do_skip(XFILE *X, afs_uint32 count)
 {
   FILE *F = X->refcon;
 
@@ -98,7 +98,7 @@ static u_int32 xf_FILE_do_skip(XFILE *X, u_int32 count)
 
 
 /* do_close for stdio xfiles */
-static u_int32 xf_FILE_do_close(XFILE *X)
+static afs_uint32 xf_FILE_do_close(XFILE *X)
 {
   FILE *F = X->refcon;
 
@@ -132,11 +132,11 @@ static void prepare(XFILE *X, FILE *F, int xflag)
 
 
 /* Open an XFILE by path */
-u_int32 xfopen_path(XFILE *X, int flag, char *path, int mode)
+afs_uint32 xfopen_path(XFILE *X, int flag, char *path, int mode)
 {
   FILE *F = 0;
   int fd = -1, xflag;
-  u_int32 code;
+  afs_uint32 code;
 
   xflag = flag & O_MODE_MASK;
   if (xflag == O_WRONLY) return ERROR_XFILE_WRONLY;
@@ -154,7 +154,7 @@ u_int32 xfopen_path(XFILE *X, int flag, char *path, int mode)
 
 
 /* Open an XFILE by FILE * */
-u_int32 xfopen_FILE(XFILE *X, int flag, FILE *F)
+afs_uint32 xfopen_FILE(XFILE *X, int flag, FILE *F)
 {
   flag &= O_MODE_MASK;
   if (flag == O_WRONLY) return ERROR_XFILE_WRONLY;
@@ -164,7 +164,7 @@ u_int32 xfopen_FILE(XFILE *X, int flag, FILE *F)
 
 
 /* Open an XFILE by file descriptor */
-u_int32 xfopen_fd(XFILE *X, int flag, int fd)
+afs_uint32 xfopen_fd(XFILE *X, int flag, int fd)
 {
   FILE *F;
 
@@ -177,14 +177,14 @@ u_int32 xfopen_fd(XFILE *X, int flag, int fd)
 
 
 /* open-by-name support for filenames */
-u_int32 xfon_path(XFILE *X, int flag, char *name)
+afs_uint32 xfon_path(XFILE *X, int flag, char *name)
 {
   return xfopen_path(X, flag, name, 0644);
 }
 
 
 /* open-by-name support for file descriptors */
-u_int32 xfon_fd(XFILE *X, int flag, char *name)
+afs_uint32 xfon_fd(XFILE *X, int flag, char *name)
 {
   int fd = atoi(name);
   return xfopen_fd(X, flag, fd);
@@ -192,7 +192,7 @@ u_int32 xfon_fd(XFILE *X, int flag, char *name)
 
 
 /* open-by-name support for standard I/O */
-u_int32 xfon_stdio(XFILE *X, int flag)
+afs_uint32 xfon_stdio(XFILE *X, int flag)
 {
   flag &= O_MODE_MASK;
   if (flag == O_WRONLY) flag = O_RDWR;

@@ -48,9 +48,9 @@ int repair_verbose;
 
 
 /* Try to dump a dump header.  Generate missing fields, if neccessary */
-u_int32 repair_dumphdr_cb(afs_dump_header *hdr, XFILE *X, void *refcon)
+afs_uint32 repair_dumphdr_cb(afs_dump_header *hdr, XFILE *X, void *refcon)
 {
-  u_int32 r, field_mask = hdr->field_mask;
+  afs_uint32 r, field_mask = hdr->field_mask;
   char volname[22];
 
   if (!(field_mask & F_DUMPHDR_VOLID)) {
@@ -85,9 +85,9 @@ u_int32 repair_dumphdr_cb(afs_dump_header *hdr, XFILE *X, void *refcon)
 
 
 /* Try to dump a volume header.  Generate missing fields, if necessary */
-u_int32 repair_volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
+afs_uint32 repair_volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
 {
-  u_int32 r, field_mask = hdr->field_mask;
+  afs_uint32 r, field_mask = hdr->field_mask;
   char volname[22];
 
   if (!(field_mask & F_VOLHDR_VOLID)) {
@@ -213,9 +213,9 @@ u_int32 repair_volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
 
 
 /* Try to dump a vnode.  Generate missing fields, if necessary */
-u_int32 repair_vnode_cb(afs_vnode *v, XFILE *X, void *refcon)
+afs_uint32 repair_vnode_cb(afs_vnode *v, XFILE *X, void *refcon)
 {
-  u_int32 r, field_mask = v->field_mask;
+  afs_uint32 r, field_mask = v->field_mask;
 
   if ((v->vnode & 1) && !field_mask) {
     if (RV) fprintf(stderr, ">>> VNODE %d is directory but has no fields?\n");

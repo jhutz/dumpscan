@@ -38,13 +38,13 @@ extern int opterr, optind;
 extern char *optarg;
 
 extern XFILE *repair_output;
-extern u_int32 repair_dumphdr_cb(afs_dump_header *, XFILE *, void *);
-extern u_int32 repair_volhdr_cb(afs_vol_header *, XFILE *, void *);
-extern u_int32 repair_vnode_cb(afs_vnode *, XFILE *, void *);
+extern afs_uint32 repair_dumphdr_cb(afs_dump_header *, XFILE *, void *);
+extern afs_uint32 repair_volhdr_cb(afs_vol_header *, XFILE *, void *);
+extern afs_uint32 repair_vnode_cb(afs_vnode *, XFILE *, void *);
 
 char *argv0;
 static char *input_path, *gendump_path;
-static u_int32 printflags, repairflags, add_admin;
+static afs_uint32 printflags, repairflags, add_admin;
 static int quiet, verbose, error_count;
 
 static path_hashinfo phi;
@@ -84,9 +84,9 @@ static void usage(int status, char *msg)
  * Returns the resulting * dumpscan print flags (DSPRINT_*).
  * If an unrecognized flag is used, prints an error message and exits.
  */
-static u_int32 parse_printflags(char *flags)
+static afs_uint32 parse_printflags(char *flags)
 {
-  u_int32 result = 0;
+  afs_uint32 result = 0;
   char *x;
 
   for (x = flags; *x; x++) switch (*x) {
@@ -109,9 +109,9 @@ static u_int32 parse_printflags(char *flags)
  * Returns the resulting * dumpscan repair flags (DSFIX_*).
  * If an unrecognized flag is used, prints an error message and exits.
  */
-static u_int32 parse_repairflags(char *flags)
+static afs_uint32 parse_repairflags(char *flags)
 {
-  u_int32 result = 0;
+  afs_uint32 result = 0;
   char *x;
 
   for (x = flags; *x; x++) switch (*x) {
@@ -166,7 +166,7 @@ static void parse_options(int argc, char **argv)
 
 
 /* A callback to count and print errors */
-static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
+static afs_uint32 my_error_cb(afs_uint32 code, int fatal, void *ref, char *msg, ...)
 {
   va_list alist;
 
@@ -180,9 +180,9 @@ static u_int32 my_error_cb(u_int32 code, int fatal, void *ref, char *msg, ...)
 
 
 /* A callback to print the path of a vnode. */
-static u_int32 print_vnode_path(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 print_vnode_path(afs_vnode *v, XFILE *X, void *refcon)
 {
-  u_int32 r;
+  afs_uint32 r;
   char *name = 0;
 
   /* Do repair, but only for known vnode types */
@@ -201,7 +201,7 @@ static u_int32 print_vnode_path(afs_vnode *v, XFILE *X, void *refcon)
 }
 
 
-static u_int32 munge_admin_acl(afs_vnode *v, XFILE *X, void *refcon)
+static afs_uint32 munge_admin_acl(afs_vnode *v, XFILE *X, void *refcon)
 {
   struct acl_accessList *acl;
   int add_entry = 1, remove_entry = -1;
@@ -241,9 +241,9 @@ static u_int32 munge_admin_acl(afs_vnode *v, XFILE *X, void *refcon)
 
 
 /* Setup for generating a repaired dump */
-static u_int32 setup_repair(void)
+static afs_uint32 setup_repair(void)
 {
-  u_int32 r;
+  afs_uint32 r;
 
   r = xfopen(&repair_output, gendump_path, O_RDWR, 0644);
   if (r) return r;
@@ -262,7 +262,7 @@ static u_int32 setup_repair(void)
 void main(int argc, char **argv)
 {
   XFILE *X;
-  u_int32 r;
+  afs_uint32 r;
 
   parse_options(argc, argv);
   initialize_UB_error_table();

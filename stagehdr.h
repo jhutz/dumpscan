@@ -43,19 +43,19 @@
 struct stage_header {
   unsigned char c_vers;               /* header version (starts at 20) */
   unsigned char c_notused[3];
-  u_int32       c_fdate;              /* dump "from" date */
-  u_int32       c_tdate;              /* dump "to" date */
-  u_int32       c_filenum;            /* tape file number */
-  u_int32       c_time;               /* time dump was done */
+  afs_uint32       c_fdate;              /* dump "from" date */
+  afs_uint32       c_tdate;              /* dump "to" date */
+  afs_uint32       c_filenum;            /* tape file number */
+  afs_uint32       c_time;               /* time dump was done */
   char          c_host[STAGE_NAMLEN]; /* hostname volume came from */
   char          c_disk[STAGE_NAMLEN]; /* partition volume came from */
   char          c_name[STAGE_NAMLEN]; /* volume name */
-  u_int32       c_id;                 /* volume ID */
-  u_int32       c_length;             /* length of the dump */
-  u_int32       c_level;              /* dump level */
-  u_int32       c_magic;              /* magic number */
-  u_int32       c_checksum;           /* checksum of backup header */
-  u_int32       c_flags;              /* feature flags */
+  afs_uint32       c_id;                 /* volume ID */
+  afs_uint32       c_length;             /* length of the dump */
+  afs_uint32       c_level;              /* dump level */
+  afs_uint32       c_magic;              /* magic number */
+  afs_uint32       c_checksum;           /* checksum of backup header */
+  afs_uint32       c_flags;              /* feature flags */
 };
 
 #endif /* _STAGEHDR_H_ */
