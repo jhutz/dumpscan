@@ -351,7 +351,7 @@ static afs_uint32 parse_acl(XFILE *X, unsigned char *tag, tagged_field *field,
       for (i = 0; i < n; i++)
         printf("              %9d  %s\n",
                ntohl(acl->entries[i].id),
-               rights2str(acl->entries[i].rights));
+               rights2str(ntohl(acl->entries[i].rights)));
     }
     n = ntohl(acl->negative);
     if (n) {
@@ -359,7 +359,7 @@ static afs_uint32 parse_acl(XFILE *X, unsigned char *tag, tagged_field *field,
       for (i = ntohl(acl->positive); i < ntohl(acl->total); i++)
         printf("              %9d  %s\n",
                ntohl(acl->entries[i].id),
-               rights2str(acl->entries[i].rights));
+               rights2str(ntohl(acl->entries[i].rights)));
     }
   }
   return ReadByte(X, tag);
