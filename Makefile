@@ -55,7 +55,7 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
 
 TARGETS = libxfiles.a libdumpscan.a \
-          afsdump_scan afsdump_dirlist afsdump_extract genroot
+          afsdump_scan afsdump_dirlist afsdump_extract genrootafs
 
 all: $(TARGETS)
 
@@ -71,8 +71,8 @@ afsdump_dirlist: libxfiles.a libdumpscan.a afsdump_dirlist.o
 afsdump_extract: libxfiles.a libdumpscan.a afsdump_extract.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_extract afsdump_extract.o $(LIBS)
 
-genroot: libxfiles.a libdumpscan.a genroot.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o genroot genroot.o $(LIBS)
+genrootafs: libxfiles.a libdumpscan.a genroot.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o genrootafs genroot.o $(LIBS)
 
 null-search: libxfiles.a libdumpscan.a null-search.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o null-search null-search.c $(LIBS)
