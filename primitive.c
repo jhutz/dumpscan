@@ -83,12 +83,14 @@ afs_uint32 ReadString(XFILE *X, unsigned char **val)
       }
       if (!buf[i]) break;
     }
-    if (result) result = (unsigned char *)realloc(result, l + i);
-    else result = (unsigned char *)malloc(i);
+    /* iff we found a null, i < BUFSIZE and buf[i] holds the NUL */
+    if (result) result = (unsigned char *)realloc(result, l + i + 1);
+    else result = (unsigned char *)malloc(i + 1);
     if (!result) return ENOMEM;
     memcpy(result + l, buf, i);
+    result[l+i] = 0;
     l += i;
-    if (!buf[i]) break;
+    if (i < BUFSIZE) break;
   }
   *val = result;
   return 0;

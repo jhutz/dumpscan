@@ -80,7 +80,7 @@ static afs_uint32 wsp(XFILE *X, int count)
   afs_uint32 err;
   int i;
 
-  if (!spbuf[[0]) {
+  if (!spbuf[0]) {
     for (x = spbuf, i = SPBUFLEN; i; x++, i--) *x = ' ';
   }
 
@@ -165,7 +165,7 @@ static afs_uint32 wsp(XFILE *X, int count)
  *     + The '#' and '+' flags have no effect.
  */
 
-vxfprintf(XFILE *X, char *fmt, va_list ap)
+afs_uint32 vxfprintf(XFILE *X, char *fmt, va_list ap)
 {
   unsigned int width, precision, haveprec, len;
   int ljust, plsign, spsign, altform, zfill;

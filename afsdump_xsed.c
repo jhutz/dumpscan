@@ -37,7 +37,7 @@
 extern int opterr, optind;
 extern char *optarg;
 
-extern XFILE *repair_output;
+extern XFILE repair_output;
 extern afs_uint32 repair_dumphdr_cb(afs_dump_header *, XFILE *, void *);
 extern afs_uint32 repair_volhdr_cb(afs_vol_header *, XFILE *, void *);
 extern afs_uint32 repair_vnode_cb(afs_vnode *, XFILE *, void *);
@@ -322,9 +322,9 @@ void main(int argc, char **argv)
   dp.print_flags  = printflags;
   r = ParseDumpFile(X, &dp);
   if (gendump_path) {
-    if (!r) r = DumpDumpEnd(repair_output);
-    if (!r) r = xfclose(repair_output);
-    else xfclose(repair_output);
+    if (!r) r = DumpDumpEnd(&repair_output);
+    if (!r) r = xfclose(&repair_output);
+    else xfclose(&repair_output);
   }
 
   if (verbose && error_count) fprintf(stderr, "*** %d errors\n", error_count);

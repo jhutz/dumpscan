@@ -42,7 +42,7 @@
 #include <afs/dir.h>
 #include <afs/prs_fs.h>
 
-XFILE *repair_output;
+XFILE repair_output;
 int repair_verbose;
 #define RV repair_verbose
 
@@ -80,7 +80,7 @@ afs_uint32 repair_dumphdr_cb(afs_dump_header *hdr, XFILE *X, void *refcon)
     hdr->field_mask |= F_DUMPHDR_TO;
   }
 
-  return DumpDumpHeader(repair_output, hdr);
+  return DumpDumpHeader(&repair_output, hdr);
 }
 
 
@@ -208,7 +208,7 @@ afs_uint32 repair_volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
     hdr->field_mask |= F_VOLHDR_UPDATE_DATE;
   }
 
-  return DumpVolumeHeader(repair_output, hdr);
+  return DumpVolumeHeader(&repair_output, hdr);
 }
 
 
@@ -315,12 +315,12 @@ afs_uint32 repair_vnode_cb(afs_vnode *v, XFILE *X, void *refcon)
     v->field_mask |= F_VNODE_ACL;
   }
 
-  r = DumpVNode(repair_output, v);
+  r = DumpVNode(&repair_output, v);
   if (r) return r;
 
   if (v->size) {
     if (r = xfseek(X, &v->d_offset)) return r;
-    r = CopyVNodeData(repair_output, X, v->size);
+    r = CopyVNodeData(&repair_output, X, v->size);
   } else if (v->type == vDirectory) {
     afs_dir_page page;
     struct DirHeader *dhp = (struct DirHeader *)&page;
@@ -356,10 +356,10 @@ afs_uint32 repair_vnode_cb(afs_vnode *v, XFILE *X, void *refcon)
     strcpy(page.entry[DHE + 2].name, "..");
     dhp->hashTable[0x44] = DHE + 2;
 
-    r = DumpVNodeData(repair_output, (char *)&page, 2048);
+    r = DumpVNodeData(&repair_output, (char *)&page, 2048);
   } else if (field_mask) {
     /* We wrote out attributes, so we should also write the 0-length data */
-    r = DumpVNodeData(repair_output, "", 0);
+    r = DumpVNodeData(&repair_output, "", 0);
   }
 
   return r;

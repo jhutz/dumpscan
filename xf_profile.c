@@ -162,20 +162,22 @@ afs_uint32 xfopen_profile(XFILE *X, int flag, char *xname, char *profile)
 
 afs_uint32 xfon_profile(XFILE *X, int flag, char *name)
 {
-  char *profile, *xname;
+  char *x, *profile, *xname;
   afs_uint32 err;
 
   if (!(name = strdup(name))) return ENOMEM;
 
-  profile = xname = name;
-  while (*name) {
-    if (name[0] == ':' && name[1] == ':') {
-      name[0] = 0; 
-      xname = name+2;
+  profile = "-";
+  xname = name;
+  for (x = name; *x; x++) {
+    if (x[0] == ':' && x[1] == ':') {
+      *x = 0;
+      profile = name;
+      xname = x + 2;
       break;
     }
   }
-  if (!name) profile = "-";
+  if (!*name) profile = "-";
   err = xfopen_profile(X, flag, xname, profile);
   free(name);
   return err;
