@@ -69,6 +69,10 @@ static afs_uint32 xf_FILE_do_tell(XFILE *X, u_int64 *offset)
   FILE *F = X->refcon;
   off_t where;
 
+  if (!X->is_seekable) {
+    cp64(*offset, X->filepos);
+    return 0;
+  }
   where = ftell(F);
   if (where == -1) return errno;
   set64(*offset, where);
