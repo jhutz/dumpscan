@@ -115,10 +115,10 @@ static u_int32 parse_repairflags(char *flags)
   char *x;
 
   for (x = flags; *x; x++) switch (*x) {
-    case '0': result |= DSPRINT_BCKHDR;  continue;
-    case 'b': result |= DSPRINT_DUMPHDR; continue;
-    case 'd': result |= DSPRINT_VOLHDR;  continue;
-    case 'v': result |= DSPRINT_ITEM;    continue;
+    case '0': result |= DSFIX_SKIP;   continue;
+    case 'b': result |= DSFIX_RSKIP;  continue;
+    case 'd': result |= DSFIX_VDSYNC; continue;
+    case 'v': result |= DSFIX_VFSYNC; continue;
     default:  usage(1, "Invalid repair options!");
   }
   return result;

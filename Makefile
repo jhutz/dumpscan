@@ -6,22 +6,23 @@ RANLIB     = ranlib
 DEBUGG     = -g
 INCLUDES   = -I/usr/local/include
 CFLAGS     = $(DEBUG) $(INCLUDES)
-LDFLAGS    = -L. -L/usr/local/lib -L/usr/local/lib/afs \
-             -L/usr/ucblib -R/usr/ucblib
+LDFLAGS    = -L. -L/usr/local/lib -L/usr/local/lib/afs
+#            -L/usr/ucblib -R/usr/ucblib
 
-LIBS                = -ldumpscan -lxfiles \
-                      -lauth -laudit -lvolser -lvldb -lubik -lrxkad \
-                      /usr/local/lib/afs/libsys.a -lrx -llwp \
-                      /usr/local/lib/afs/util.a -lcom_err \
-                      -lsocket -lnsl -lucb
-OBJS_afsdump_scan   = afsdump_scan.o repair.o
-OBJS_afsdump_xsed   = afsdump_xsed.o repair.o
-OBJS_libxfiles.a    = xfiles.o xf_errs.o xf_files.o xf_rxcall.o int64.o
-OBJS_libdumpscan.a  = primitive.o util.o dumpscan_errs.o parsetag.o \
-                      parsedump.o parsevol.o parsevnode.o dump.o \
-                      directory.o pathname.o backuphdr.o stagehdr.o
+LIBS                 = -ldumpscan -lxfiles \
+                       -lauth -laudit -lvolser -lvldb -lubik -lrxkad \
+                       /usr/local/lib/afs/libsys.a -lrx -llwp \
+                       /usr/local/lib/afs/util.a -lcom_err
+#                      -lsocket -lnsl -lucb
+OBJS_afsdump_scan    = afsdump_scan.o repair.o
+OBJS_afsdump_xsed    = afsdump_xsed.o repair.o
+OBJS_libxfiles.a     = xfiles.o xf_errs.o xf_files.o xf_rxcall.o int64.o
+OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
+                       parsedump.o parsevol.o parsevnode.o dump.o \
+                       directory.o pathname.o backuphdr.o stagehdr.o
 
-TARGETS = afsdump_scan libxfiles.a libdumpscan.a
+TARGETS = libxfiles.a libdumpscan.a \
+          afsdump_scan afsdump_dirlist
 
 all: $(TARGETS)
 
@@ -30,6 +31,9 @@ afsdump_scan: libxfiles.a libdumpscan.a $(OBJS_afsdump_scan)
 
 afsdump_xsed: libxfiles.a libdumpscan.a $(OBJS_afsdump_xsed)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_xsed $(OBJS_afsdump_xsed) $(LIBS)
+
+afsdump_dirlist: libxfiles.a libdumpscan.a afsdump_dirlist.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_dirlist afsdump_dirlist.o $(LIBS)
 
 null-search: libxfiles.a libdumpscan.a null-search.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o null-search null-search.c $(LIBS)

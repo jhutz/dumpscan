@@ -68,9 +68,12 @@ u_int32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v, u_int32 size)
     printf("  ========== ==========  ==============================\n");
   }
   if ((p->flags & DSFLAG_SEEK) && (r = xftell(X, &where))) return r;
-  for (pgno = 0; size; pgno++, size -= AFS_PAGESIZE) {
+  for (pgno = 0; size; pgno++, size -= (size < 0) ? 0 : AFS_PAGESIZE) {
     if ((p->flags & DSFLAG_SEEK) && (r = xfseek(X, &where))) return r;
-    if (r = xfread(X, &page, AFS_PAGESIZE)) return r;
+    if (r = xfread(X, &page, AFS_PAGESIZE)) {
+      if (size < 0 && r == ERROR_XFILE_EOF) break;
+      return r;
+    }
     if ((p->flags & DSFLAG_SEEK) && (r = xftell(X, &where))) return r;
     if (page.header.tag != htons(1234)) {
       if (p->cb_error)
