@@ -41,8 +41,9 @@
 #define O_MODE_MASK (O_RDONLY | O_WRONLY | O_RDWR)
 
 typedef struct {
-  XFILE content;
-  XFILE profile;
+  XFILE *content;
+  XFILE *profile;
+  int free_content, free_profile;
 } PFILE;
 
 
@@ -52,8 +53,8 @@ static afs_uint32 xf_PROFILE_do_read(XFILE *X, void *buf, afs_uint32 count)
   PFILE *PF = X->refcon;
   afs_uint32 err;
 
-  err = xfread(&PF->content, buf, count);
-  xfprintf(&PF->profile, "R %ld =%ld\n", (long)count, (long)err);
+  err = xfread(PF->content, buf, count);
+  xfprintf(PF->profile, "R %ld =%ld\n", (long)count, (long)err);
   return err;
 }
 
@@ -64,8 +65,8 @@ static afs_uint32 xf_PROFILE_do_write(XFILE *X, void *buf, afs_uint32 count)
   PFILE *PF = X->refcon;
   afs_uint32 err;
 
-  err = xfwrite(&PF->content, buf, count);
-  xfprintf(&PF->profile, "W %ld =%ld\n", (long)count, (long)err);
+  err = xfwrite(PF->content, buf, count);
+  xfprintf(PF->profile, "W %ld =%ld\n", (long)count, (long)err);
   return err;
 }
 
@@ -76,9 +77,9 @@ static afs_uint32 xf_PROFILE_do_tell(XFILE *X, u_int64 *offset)
   PFILE *PF = X->refcon;
   afs_uint32 err;
 
-  err = xftell(&PF->content, offset);
-  if (err) xfprintf(&PF->profile, "TELL ERR =%ld\n", (long)err);
-  else     xfprintf(&PF->profile, "TELL %s =0\n", hexify_int64(offset, 0));
+  err = xftell(PF->content, offset);
+  if (err) xfprintf(PF->profile, "TELL ERR =%ld\n", (long)err);
+  else     xfprintf(PF->profile, "TELL %s =0\n", hexify_int64(offset, 0));
   return err;
 }
 
@@ -89,8 +90,8 @@ static afs_uint32 xf_PROFILE_do_seek(XFILE *X, u_int64 *offset)
   PFILE *PF = X->refcon;
   afs_uint32 err;
 
-  err = xfseek(&PF->content, offset);
-  xfprintf(&PF->profile, "SEEK %s =%ld\n", hexify_int64(offset, 0), (long)err);
+  err = xfseek(PF->content, offset);
+  xfprintf(PF->profile, "SEEK %s =%ld\n", hexify_int64(offset, 0), (long)err);
   return err;
 }
 
@@ -101,8 +102,8 @@ static afs_uint32 xf_PROFILE_do_skip(XFILE *X, afs_uint32 count)
   PFILE *PF = X->refcon;
   afs_uint32 err;
 
-  err = xfskip(&PF->content, count);
-  xfprintf(&PF->profile, "SKIP %ld =%ld\n", (long)count, (long)err);
+  err = xfskip(PF->content, count);
+  xfprintf(PF->profile, "SKIP %ld =%ld\n", (long)count, (long)err);
   return err;
 }
 
@@ -113,15 +114,19 @@ static afs_uint32 xf_PROFILE_do_close(XFILE *X)
   PFILE *PF = X->refcon;
   afs_uint32 err, err2;
 
-  err = xfclose(&PF->content);
-  err2 = xfclose(&PF->profile);
+  err = xfclose(PF->content);
+  err2 = xfclose(PF->profile);
+  if (PF->free_content) free(PF->content);
+  if (PF->free_profile) free(PF->profile);
   free(PF);
   return err ? err : err2;
 }
 
 
 /* Open a profiled XFILE */
-afs_uint32 xfopen_profile(XFILE *X, int flag, char *xname, char *profile)
+afs_uint32 xf_PROFILE_do_open(XFILE *X, int flag, char *xname,
+                              XFILE *content, int free_content,
+                              XFILE *profile, int free_profile)
 {
   PFILE *PF;
   afs_uint32 err;
@@ -130,18 +135,10 @@ afs_uint32 xfopen_profile(XFILE *X, int flag, char *xname, char *profile)
   if (!PF) return ENOMEM;
   memset(PF, 0, sizeof(*PF));
 
-  err = xfopen(&PF->profile, O_RDWR|O_CREAT|O_TRUNC, profile);
-  if (err) {
-    free(PF);
-    return err;
-  }
-
-  err = xfopen(&PF->content, flag, xname);
-  if (err) {
-    xfclose(&PF->profile);
-    free(PF);
-    return err;
-  }
+  PF->content = content;
+  PF->profile = profile;
+  PF->free_content = free_content;
+  PF->free_profile = free_profile;
 
   memset(X, 0, sizeof(*X));
   X->refcon = PF;
@@ -149,36 +146,18 @@ afs_uint32 xfopen_profile(XFILE *X, int flag, char *xname, char *profile)
   X->do_write = xf_PROFILE_do_write;
   X->do_tell  = xf_PROFILE_do_tell;
   X->do_close = xf_PROFILE_do_close;
-  X->is_writable = PF->content.is_writable;
-  if (PF->content.is_seekable) {
+  X->is_writable = PF->content->is_writable;
+  if (PF->content->is_seekable) {
     X->is_seekable;
     X->do_seek  = xf_PROFILE_do_seek;
     X->do_skip  = xf_PROFILE_do_skip;
   }
-  xfprintf(&PF->profile, "OPEN %s\n", xname);
+  xfprintf(PF->profile, "OPEN %s\n", xname);
   return 0;
 }
 
 
-afs_uint32 xfon_profile(XFILE *X, int flag, char *name)
+afs_uint32 xfopen_profile(XFILE *X, int flag, XFILE *cX, XFILE *pX)
 {
-  char *x, *profile, *xname;
-  afs_uint32 err;
-
-  if (!(name = strdup(name))) return ENOMEM;
-
-  profile = "-";
-  xname = name;
-  for (x = name; *x; x++) {
-    if (x[0] == ':' && x[1] == ':') {
-      *x = 0;
-      profile = name;
-      xname = x + 2;
-      break;
-    }
-  }
-  if (!*name) profile = "-";
-  err = xfopen_profile(X, flag, xname, profile);
-  free(name);
-  return err;
+  return xf_PROFILE_do_open(X, flag, "<X>", cX, 0, pX, 0);
 }

@@ -67,10 +67,15 @@ extern afs_uint32 xfopen     (XFILE *, int, char *);      /* open by TYPE:name *
 extern afs_uint32 xfopen_path(XFILE *, int, char *, int); /* open by path   */
 extern afs_uint32 xfopen_FILE(XFILE *, int, FILE *);      /* open by FILE * */
 extern afs_uint32 xfopen_fd  (XFILE *, int, int);         /* open by fd     */
+
 extern afs_uint32 xfopen_rxcall (XFILE *, int, struct rx_call *);
 extern afs_uint32 xfopen_voldump(XFILE *, struct rx_connection *,
                               afs_int32, afs_int32, afs_int32);
-extern afs_uint32 xfopen_profile(XFILE *, int, char *, char *);
+
+extern afs_uint32 xfopen_profile(XFILE *, int, XFILE *, XFILE *);
+extern afs_uint32 xfopen_profile_to(XFILE *, int, XFILE *, char *);
+extern afs_uint32 xfopen_profile_name(XFILE *, int, char *, XFILE *);
+extern afs_uint32 xfopen_profile_name_to(XFILE *, int, char *, char *);
 
 extern afs_uint32 xfregister(char *, afs_uint32 (*)(XFILE *, int, char *));
 

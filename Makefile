@@ -47,8 +47,9 @@ LIBS                 = -ldumpscan -lxfiles \
                        /usr/local/lib/afs/util.a -lcom_err $(XLIBS)
 OBJS_afsdump_scan    = afsdump_scan.o repair.o
 OBJS_afsdump_xsed    = afsdump_xsed.o repair.o
-OBJS_libxfiles.a     = xfiles.o xf_errs.o xf_printf.o int64.o \
-                       xf_files.o xf_rxcall.o xf_profile.o
+OBJS_libxfiles.a     = xfiles.o xfopen.o xf_errs.o xf_printf.o int64.o \
+                       xf_files.o xf_rxcall.o xf_voldump.o \
+                       xf_profile.o xf_profile_name.o
 OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        parsedump.o parsevol.o parsevnode.o dump.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
