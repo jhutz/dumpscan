@@ -96,4 +96,4 @@ parsevnode.o parsevol.o pathname.o repair.o:    dumpscan_errs.h
 stagehdr.o util.o:                              dumpscan_errs.h
 
 clean:
-	-rm xf_errs.c xf_errs.h dumpscan_errs.c dumpscan_errs.h *.o $(TARGETS)
+	-rm -f xf_errs.c xf_errs.h dumpscan_errs.c dumpscan_errs.h *.o $(TARGETS)

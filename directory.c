@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2004 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -26,11 +26,13 @@
  * the rights to redistribute these changes.
  */
 
-/* directory.c - Parse an AFS directory */
+/* directory.c - AFS directory parsing and generation */
 /* See the end of this file for a description of the directory format */
 
 #include <errno.h>
 #include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 #include <netinet/in.h>
 
 #include "dumpscan.h"
@@ -41,10 +43,36 @@
 
 #include <afs/dir.h>
 
+struct dir_state {
+  unsigned char **dirpages;
+  int npages;
+
+  afs_dir_header *dh;        /* Directory header */
+  afs_dir_page *page;        /* Current page */
+  int pageno;                /* Current page # */
+  int entno;                 /* Current (next avail) entry # */
+  int used;                  /* # entries used in this page */
+};
+
 static afs_dir_page page;
 
-#define allocbit(x) (page.header.freebitmap[(x)>>3] & (1 << ((x) & 7)))
+#define bmbyte(bm,x) bm[(x)>>3]
+#define bmbit(x) (1 << ((x) & 7))
+
+#define allocbit(x) (bmbyte(page.header.freebitmap,x) & bmbit(x))
+#define setallocbit(bm,x) (bmbyte(bm,x) |= bmbit(x))
+
 #define DPHE (DHE + 1)
+
+/* Hash function used in AFS directories.  */
+static int namehash(char *name, int buckets, int seed)
+{   
+  int hval = seed, tval;
+
+  while (*name) hval = (hval * 173) + *name++;
+  tval = hval & (buckets - 1);
+  return tval ? hval < 0 ? buckets - tval : tval : 0;
+}
 
 static void fixup(char *name, int l)
 {
@@ -192,6 +220,111 @@ afs_uint32 DirectoryLookup(XFILE *X, dump_parser *p, afs_uint32 size,
   r = parse_directory(X, &my_p, 0, size, 0);
   if (!r) r = DSERR_DONE;
   return handle_return(r, X, 0, p);
+}
+
+
+static int allocpage(struct dir_state *ds, int reserve)
+{
+  unsigned char **dirpages;
+  int i;
+
+  dirpages = malloc((ds->npages + 1) * sizeof(unsigned char *));
+  if (!dirpages) return ENOMEM;
+  if (ds->dirpages) {
+    memcpy(dirpages, ds->dirpages, ds->npages * sizeof(unsigned char *));
+    free(ds->dirpages);
+  }
+  ds->dirpages = dirpages;
+
+  ds->dirpages[ds->npages] = malloc(AFS_PAGESIZE);
+  if (!ds->dirpages[ds->npages]) return ENOMEM;
+  ds->pageno = ds->npages++;
+
+  ds->page = (afs_dir_page *)(ds->dirpages[ds->pageno]);
+  memset(ds->page, 0, AFS_PAGESIZE);
+  ds->page->header.tag = htons(AFS_DIR_MAGIC);
+  ds->entno = ds->used = reserve;
+  for (i = 0; i < reserve; i++)
+    setallocbit(ds->page->header.freebitmap, i);
+  return 0;
+}
+
+
+afs_uint32 Dir_Init(struct dir_state **dsp)
+{
+  afs_uint32 vnode, uniq, r;
+  int i;
+
+  *dsp = malloc(sizeof(struct dir_state));
+  if (!*dsp) return ENOMEM;
+  memset(*dsp, 0, sizeof(struct dir_state));
+  if ((r = allocpage(*dsp, DPHE))) return r;
+  (*dsp)->dh = (afs_dir_header *)((*dsp)->page);
+  return 0;
+}
+
+
+afs_uint32 Dir_AddEntry(struct dir_state *ds, char *name,
+                        afs_uint32 vnode, afs_uint32 unique)
+{
+  afs_uint32 r;
+  int l = strlen(name) + 1;
+  int ne = l > 16 ? 1 + ((l - 16) / 32) + !!((l - 16) % 32) : 1;
+  int hash = namehash(name, NHASHENT, 0);
+
+  if (ne > EPP - 1) return ENAMETOOLONG;
+  if (ds->entno + ne > EPP) {
+    if (ds->pageno < 128) ds->dh->allomap[ds->pageno] = ds->used;
+    if ((r = allocpage(ds, 1))) return r;
+  }
+  ds->page->entry[ds->entno].flag    = FFIRST;
+  ds->page->entry[ds->entno].next    = ds->dh->hash[hash];
+  ds->page->entry[ds->entno].vnode   = htonl(vnode);
+  ds->page->entry[ds->entno].vunique = htonl(unique);
+  strcpy(ds->page->entry[ds->entno].name, name);
+  ds->dh->hash[hash] = htons((ds->pageno * EPP) + ds->entno);
+  while (ne--) {
+    setallocbit(ds->page->header.freebitmap, ds->entno);
+    ds->used++;
+    ds->entno++;
+  }
+  return 0;
+}
+
+
+afs_uint32 Dir_Finalize(struct dir_state *ds)
+{
+  int pages = ds->pageno + 1;
+  
+  if (ds->pageno < 128) ds->dh->allomap[ds->pageno] = ds->used;
+  ds->dh->pagehdr.pgcount = htons(pages);
+  return 0;
+}
+
+
+afs_uint32 Dir_EmitData(struct dir_state *ds, XFILE *X, int dotag)
+{
+  afs_uint32 r, size;
+  int i;
+
+  size = ds->npages * AFS_PAGESIZE;
+  if (dotag && (r = WriteTagInt32(X, VTAG_DATA, size))) return r;
+  for (i = 0; i < ds->npages; i++) {
+    if (r = xfwrite(X, ds->dirpages[i], AFS_PAGESIZE)) return r;
+  }
+  return 0;
+}
+
+
+afs_uint32 Dir_Free(struct dir_state *ds)
+{
+  int i;
+
+  for (i = 0; i < ds->npages; i++)
+    free(ds->dirpages[i]);
+  free(ds->dirpages);
+  free(ds);
+  return 0;
 }
 
 

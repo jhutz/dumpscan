@@ -45,6 +45,7 @@ typedef struct tagged_field tagged_field;
 typedef struct tag_parse_info tag_parse_info;
 typedef afs_uint32 (*tag_parser)(XFILE *, unsigned char *, tagged_field *,
                               afs_uint32, tag_parse_info *, void *, void *);
+typedef struct dir_state dir_state;
 
 /* Error codes used within dumpscan.
  * Any of the routines declared below, or callbacks used by them,
@@ -352,10 +353,16 @@ extern afs_uint32 ParseVolumeHeader(XFILE *, dump_parser *);
 extern afs_uint32 ParseVNode(XFILE *, dump_parser *);
 
 
-/* directory.c - Directory parsing and lookup */
+/* directory.c - Directory parsing, lookup, and generation */
 extern afs_uint32 ParseDirectory(XFILE *, dump_parser *, afs_uint32, int);
 extern afs_uint32 DirectoryLookup(XFILE *, dump_parser *, afs_uint32,
                            char **, afs_uint32 *, afs_uint32 *);
+extern afs_uint32 Dir_Init(dir_state **);
+extern afs_uint32 Dir_AddEntry(dir_state *, char *, afs_uint32, afs_uint32);
+extern afs_uint32 Dir_Finalize(dir_state *);
+extern afs_uint32 Dir_EmitData(dir_state *, XFILE *, int);
+extern afs_uint32 Dir_Free(dir_state *ds);
+
 
 /* dump.c - Dump parts of a volume dump */
 extern afs_uint32 DumpDumpHeader(XFILE *, afs_dump_header *);

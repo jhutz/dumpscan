@@ -122,7 +122,10 @@
 #define VTAG_DATA        'f'
 
 
-#define AFS_DIR_EPP 64
+#define AFS_DIR_MAGIC    1234
+#define AFS_DIR_EPP        64
+#define AFS_DIR_MAXPAGES  128
+#define AFS_DIR_NHASH     128
 
 typedef struct {
   afs_uint16 pgcount;
@@ -131,6 +134,12 @@ typedef struct {
   char freebitmap[AFS_DIR_EPP/8];
   char padding[32 - (5 + AFS_DIR_EPP/8)];
 } afs_dir_pagehdr;
+
+typedef struct {
+  afs_dir_pagehdr pagehdr;
+  char allomap[AFS_DIR_MAXPAGES];
+  afs_uint16 hash[AFS_DIR_NHASH];
+} afs_dir_header;
 
 typedef struct {
   char flag;
