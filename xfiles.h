@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -58,9 +58,10 @@ struct XFILE {
 
 /* Functions for opening XFILEs.  For these, the first two arguments are
  * always a pointer to an XFILE to fill in, and the mode in which to
- * open the file.  O_RDONLY and O_RDWR are permitted; O_WRONLY is not.
- * Other open modes may or may not be used, depending on the object type.
- * Remaining arguments are a function of the object type
+ * open the file.  O_RDONLY, O_WRONLY, and O_RDWR are all permitted, but
+ * O_WRONLY may not cause the underlying object to be opened in write-only
+ * mode.  Other open modes may or may not be used, depending on the object
+ * type.  Remaining arguments are a function of the object type
  */
 extern afs_uint32 xfopen     (XFILE *, int, char *);      /* open by TYPE:name */
 extern afs_uint32 xfopen_path(XFILE *, int, char *, int); /* open by path   */

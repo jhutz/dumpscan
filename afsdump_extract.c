@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -52,7 +52,8 @@ extern char *optarg;
 
 char *argv0;
 static char **file_names;
-static int *file_vnums, name_count, vnum_count;
+static afs_int32 *file_vnums;
+static int name_count, vnum_count;
 
 static char *input_path, *target;
 static int quiet, verbose, error_count, dirs_done, extract_all;
@@ -468,7 +469,7 @@ static afs_uint32 lose_cb(afs_vnode *v, XFILE *F, void *refcon)
 
 
 /* Main program */
-void main(int argc, char **argv)
+int main(int argc, char **argv)
 {
   XFILE input_file;
   afs_uint32 r;

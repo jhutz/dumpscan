@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -162,4 +162,14 @@ afs_uint32 WriteTagInt32Pair(XFILE *X, unsigned char tag,
   buffer[7] = (val2 & 0xff00) >> 8;
   buffer[8] = val2 & 0xff;
   return xfwrite(X, buffer, 9);
+}
+
+afs_uint32 WriteTagString(XFILE *X, unsigned char tag, unsigned char *str)
+{
+  int len = strlen((char *)str) + 1;
+  int code;
+
+  code = xfwrite(X, &tag, 1);
+  if (code) return code;
+  return xfwrite(X, str, len);
 }

@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -130,10 +130,10 @@ afs_uint32 DumpVolumeHeader(XFILE *OX, afs_vol_header *hdr)
     if (r = WriteTagInt32(OX, VHTAG_BACKUP, hdr->backup_date)) return r;
   }
   if (hdr->field_mask & F_VOLHDR_OFFLINE_MSG) {
-    if (r = WriteTagInt32(OX, VHTAG_OFFLINE, hdr->offline_msg)) return r;
+    if (r = WriteTagString(OX, VHTAG_OFFLINE, hdr->offline_msg)) return r;
   }
   if (hdr->field_mask & F_VOLHDR_MOTD) {
-    if (r = WriteTagInt32(OX, VHTAG_MOTD, hdr->motd_msg)) return r;
+    if (r = WriteTagString(OX, VHTAG_MOTD, hdr->motd_msg)) return r;
   }
   if (hdr->field_mask & F_VOLHDR_WEEKUSE) {
     if (r = WriteTagInt16(OX, VHTAG_WEEKUSE, 7)) return r;

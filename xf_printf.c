@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -264,7 +264,7 @@ afs_uint32 vxfprintf(XFILE *X, char *fmt, va_list ap)
       case 'i': 
       case 'd': /* signed decimal integer */
         if      (lflag) SVAL = va_arg(ap, long);
-        else if (hflag) SVAL = va_arg(ap, short);
+        else if (hflag) SVAL = va_arg(ap, int);
         else            SVAL = va_arg(ap, int);
         UVAL = (SVAL < 0) ? -SVAL : SVAL;
 
@@ -288,7 +288,7 @@ afs_uint32 vxfprintf(XFILE *X, char *fmt, va_list ap)
 
       case 'o': /* unsigned octal integer */
         if      (lflag) UVAL = va_arg(ap, unsigned long);
-        else if (hflag) UVAL = va_arg(ap, unsigned short);
+        else if (hflag) UVAL = va_arg(ap, unsigned int);
         else            UVAL = va_arg(ap, unsigned int);
 
         xbuf[0] = '0';
@@ -306,7 +306,7 @@ afs_uint32 vxfprintf(XFILE *X, char *fmt, va_list ap)
 
       case 'u': /* unsigned decimal integer */
         if      (lflag) UVAL = va_arg(ap, unsigned long);
-        else if (hflag) UVAL = va_arg(ap, unsigned short);
+        else if (hflag) UVAL = va_arg(ap, unsigned int);
         else            UVAL = va_arg(ap, unsigned int);
 
         if (!haveprec) {
@@ -323,7 +323,7 @@ afs_uint32 vxfprintf(XFILE *X, char *fmt, va_list ap)
       case 'x': 
       case 'X': /* unsigned hexadecimal integer */
         if      (lflag) UVAL = va_arg(ap, unsigned long);
-        else if (hflag) UVAL = va_arg(ap, unsigned short);
+        else if (hflag) UVAL = va_arg(ap, unsigned int);
         else            UVAL = va_arg(ap, unsigned int);
 
         xbuf[0] = '0';

@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -139,7 +139,7 @@ afs_uint32 xfopen_path(XFILE *X, int flag, char *path, int mode)
   afs_uint32 code;
 
   xflag = flag & O_MODE_MASK;
-  if (xflag == O_WRONLY) return ERROR_XFILE_WRONLY;
+  if (xflag == O_WRONLY) xflag = O_RDWR;
 
   if ((fd = open(path, flag, mode)) < 0) return errno;
   if (!(F = fdopen(fd, (xflag == O_RDONLY) ? "r" : "r+"))) {
@@ -157,7 +157,7 @@ afs_uint32 xfopen_path(XFILE *X, int flag, char *path, int mode)
 afs_uint32 xfopen_FILE(XFILE *X, int flag, FILE *F)
 {
   flag &= O_MODE_MASK;
-  if (flag == O_WRONLY) return ERROR_XFILE_WRONLY;
+  if (flag == O_WRONLY) flag = O_RDWR;
   prepare(X, F, flag);
   return 0;
 }
@@ -169,7 +169,7 @@ afs_uint32 xfopen_fd(XFILE *X, int flag, int fd)
   FILE *F;
 
   flag &= O_MODE_MASK;
-  if (flag == O_WRONLY) return ERROR_XFILE_WRONLY;
+  if (flag == O_WRONLY) flag = O_RDWR;
   if (!(F = fdopen(fd, (flag == O_RDONLY) ? "r" : "r+"))) return errno;
   prepare(X, F, flag);
   return 0;

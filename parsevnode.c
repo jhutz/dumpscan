@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -353,7 +353,7 @@ static afs_uint32 parse_acl(XFILE *X, unsigned char *tag, tagged_field *field,
     }
     n = ntohl(acl->negative);
     if (n) {
-      printf("Positive ACL: %d entries\n", n);
+      printf("Negative ACL: %d entries\n", n);
       for (i = ntohl(acl->positive); i < ntohl(acl->total); i++)
         printf("              %9d  %s\n",
                ntohl(acl->entries[i].id),

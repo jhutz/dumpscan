@@ -2,7 +2,7 @@
  * CMUCS AFStools
  * dumpscan - routines for scanning and manipulating AFS volume dumps
  *
- * Copyright (c) 1998, 2001 Carnegie Mellon University
+ * Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
  * All Rights Reserved.
  * 
  * Permission to use, copy, modify and distribute this software and its
@@ -60,6 +60,7 @@ struct rxinfo {
   struct rx_call *call;        /* call */
   afs_int32 tid;                   /* volser transaction ID */
   afs_uint32 code;                /* result code */
+  int writemode;               /* set if connection is write-only */
 };
 
 static afs_uint32 xf_rxcall_do_read(XFILE *X, void *buf, afs_uint32 count)
@@ -67,11 +68,11 @@ static afs_uint32 xf_rxcall_do_read(XFILE *X, void *buf, afs_uint32 count)
   struct rxinfo *i = X->refcon;
   afs_uint32 xcount;
 
+  if (i->writemode) return ERROR_XFILE_WRONLY;
   xcount = rx_Read(i->call, buf, count);
   if (xcount == count) return 0;
-  i->code = rx_EndCall(i->call, 0);
-  i->call = 0;
-  return i->code ? i->code : ERROR_XFILE_RDONLY;
+  i->code = rx_Error(i->call);
+  return i->code ? i->code : ERROR_XFILE_EOF;
 }
 
 
@@ -82,9 +83,8 @@ static afs_uint32 xf_rxcall_do_write(XFILE *X, void *buf, afs_uint32 count)
 
   xcount = rx_Write(i->call, buf, count);
   if (xcount == count) return 0;
-  i->code = rx_EndCall(i->call, 0);
-  i->call = 0;
-  return i->code;
+  i->code = rx_Error(i->call);
+  return i->code ? i->code : ERROR_XFILE_EOF;
 }
 
 
@@ -93,12 +93,7 @@ static afs_uint32 xf_rxcall_do_close(XFILE *X)
   struct rxinfo *i = X->refcon;
   afs_uint32 code;
 
-  if (i->call) {
-    code = rx_EndCall(i->call, i->code);
-    i->call = 0;
-  } else {
-    code = i->code;
-  }
+  code = i->code;
   free(i);
   return code;
 }
@@ -107,11 +102,13 @@ static afs_uint32 xf_rxcall_do_close(XFILE *X)
 static afs_uint32 xf_voldump_do_close(XFILE *X)
 {
   struct rxinfo *i = X->refcon;
+  struct rx_call *call = i->call;
   struct rx_connection *conn = i->conn;
   afs_uint32 code, rcode, xcode;
   afs_int32 tid = i->tid;
 
   code = xf_rxcall_do_close(X);
+  code = rx_EndCall(call, code);
   xcode = AFSVolEndTrans(conn, tid, &rcode);
   if (!code) code = xcode ? xcode : rcode;
   return code;
@@ -123,7 +120,6 @@ afs_uint32 xfopen_rxcall(XFILE *X, int flag, struct rx_call *call)
   struct rxinfo *i;
 
   flag &= O_MODE_MASK;
-  if (flag == O_WRONLY) return ERROR_XFILE_WRONLY;
   memset(X, 0, sizeof(*X));
   if (!(i = (struct rxinfo *)malloc(sizeof(struct rxinfo)))) return ENOMEM;
   i->call = call;
@@ -131,7 +127,8 @@ afs_uint32 xfopen_rxcall(XFILE *X, int flag, struct rx_call *call)
   X->do_read  = xf_rxcall_do_read;
   X->do_write = xf_rxcall_do_write;
   X->do_close = xf_rxcall_do_close;
-  X->is_writable = (flag == O_RDWR);
+  X->is_writable = (flag != O_RDONLY);
+  i->writemode = (flag == O_WRONLY);
   X->refcon = i;
   return 0;
 }
