@@ -33,6 +33,7 @@
 #define _XFILES_H_
 
 #include <stdio.h>
+#include <stdarg.h>
 #include "intNN.h"
 
 struct rx_call;
@@ -74,6 +75,8 @@ extern afs_uint32 xfregister(char *, afs_uint32 (*)(XFILE *, int, char *));
 /* Standard operations on XFILEs */
 extern afs_uint32 xfread(XFILE *, void *, afs_uint32);     /* read data */
 extern afs_uint32 xfwrite(XFILE *, void *, afs_uint32);    /* write data */
+extern afs_uint32 xfprintf(XFILE *, char *, ...);          /* formatted */
+extern afs_uint32 vxfprintf(XFILE *, char *, va_list);     /* formatted VA */
 extern afs_uint32 xftell(XFILE *, u_int64 *);              /* get position */
 extern afs_uint32 xfseek(XFILE *, u_int64 *);              /* set position */
 extern afs_uint32 xfskip(XFILE *, afs_uint32);             /* skip forward */
