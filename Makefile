@@ -28,17 +28,23 @@ AR         = ar
 COMPILE_ET = compile_et
 RANLIB     = ranlib
 
+# On Linux:
+R=-Wl,-rpath,
+
+# On Solaris:
+# R        = -R
+# XLDFLAGS = -L/usr/ucblib -R/usr/ucblib
+# XLIBS    = -lsocket -lnsl -lucb
+
 DEBUG      = -g
 INCLUDES   = -I/usr/local/include
 CFLAGS     = $(DEBUG) $(INCLUDES)
-LDFLAGS    = -L. -L/usr/local/lib -L/usr/local/lib/afs
-#            -L/usr/ucblib -R/usr/ucblib
+LDFLAGS    = -L. -L/usr/local/lib $(R)/usr/local/lib -L/usr/local/lib/afs $(XLDFLAGS)
 
 LIBS                 = -ldumpscan -lxfiles \
                        -lauth -laudit -lvolser -lvldb -lubik -lrxkad \
                        /usr/local/lib/afs/libsys.a -lrx -llwp \
-                       /usr/local/lib/afs/util.a -lcom_err
-#                      -lsocket -lnsl -lucb
+                       /usr/local/lib/afs/util.a -lcom_err $(XLIBS)
 OBJS_afsdump_scan    = afsdump_scan.o repair.o
 OBJS_afsdump_xsed    = afsdump_xsed.o repair.o
 OBJS_libxfiles.a     = xfiles.o xf_errs.o xf_printf.o int64.o \
