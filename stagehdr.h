@@ -34,22 +34,22 @@
 #include "intNN.h"
 
 /* Stage-related constants */
-#define STAGE_MAGIC    0x00adf8bc       /* magic number for stage header */
-#define STAGE_CHECKSUM 84446            /* checksum (same as 4.2bsd dump) */
-#define STAGE_VERSMIN  20               /* minimum version */
-#define STAGE_NAMLEN   64               /* length of host/part/vol names */
-#define STAGE_HDRLEN   1024             /* size of the header */
+#define V20_MAGIC    0x00adf8bc          /* magic number for stage header */
+#define V20_CHECKSUM 84446               /* checksum (same as 4.2bsd dump) */
+#define V20_VERSMIN  20                  /* minimum version */
+#define V20_NAMLEN   64                  /* length of host/part/vol names */
+#define V20_HDRLEN   1024                /* size of the header */
 
-struct stage_header {
-  unsigned char c_vers;               /* header version (starts at 20) */
+struct v20_header {
+  unsigned char c_vers;                  /* header version (starts at 20) */
   unsigned char c_notused[3];
   afs_uint32       c_fdate;              /* dump "from" date */
   afs_uint32       c_tdate;              /* dump "to" date */
   afs_uint32       c_filenum;            /* tape file number */
   afs_uint32       c_time;               /* time dump was done */
-  char          c_host[STAGE_NAMLEN]; /* hostname volume came from */
-  char          c_disk[STAGE_NAMLEN]; /* partition volume came from */
-  char          c_name[STAGE_NAMLEN]; /* volume name */
+  char             c_host[V20_NAMLEN];   /* hostname volume came from */
+  char             c_disk[V20_NAMLEN];   /* partition volume came from */
+  char             c_name[V20_NAMLEN];   /* volume name */
   afs_uint32       c_id;                 /* volume ID */
   afs_uint32       c_length;             /* length of the dump */
   afs_uint32       c_level;              /* dump level */
@@ -57,5 +57,13 @@ struct stage_header {
   afs_uint32       c_checksum;           /* checksum of backup header */
   afs_uint32       c_flags;              /* feature flags */
 };
+
+#define DUMPHDR_MAGIC      0x53214446
+#define DUMPHDR_VERS       2
+#define DUMPHDR_VERS64     3
+#define DUMPHDR_LEN        0x70
+#define DUMPHDR_LEN64      0x72
+#define DUMPHDR_MAXVOLNAME 65
+#define DUMPHDR_MAXSYSNAME 9
 
 #endif /* _STAGEHDR_H_ */

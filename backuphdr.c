@@ -45,7 +45,8 @@ afs_uint32 try_backuphdr(XFILE *X, char *tag, tagged_field *field,
 
   /* Which header should we try (if any)? */
   switch (*tag) {
-    case STAGE_VERSMIN: r = ParseStageHdr(X, tag, &bh); break;
+    case V20_VERSMIN: r = ParseStageV20Hdr(X, tag, &bh); break;
+    case 'S':         r = ParseStageHdr(X, tag, &bh); break;
     default: return DSERR_MAGIC;
   }
   if (r) return r;
@@ -82,6 +83,6 @@ void PrintBackupHdr(backup_system_header *hdr)
   printf("          => %s", ctime(&to));
   printf(" Dump Time:  %d == %s", hdr->dump_date, ctime(&dd));
   printf(" Dump Flags: 0x%08x\n", hdr->flags);
-  printf(" Length:     %d\n", hdr->dumplen);
+  printf(" Length:     %s\n", decimate_int64(&hdr->dumplen, 0));
   printf(" File Num:   %d\n", hdr->filenum);
 }

@@ -78,7 +78,7 @@ typedef struct {
   unsigned char *part;
   unsigned char *volname;
   afs_uint32 volid;
-  afs_uint32 dumplen;
+  u_int64 dumplen;
   afs_uint32 level;
   afs_uint32 magic;
   afs_uint32 cksum;
@@ -341,7 +341,8 @@ extern afs_uint32 ParseTaggedData(XFILE *, tagged_field *, unsigned char *,
 
 /* stagehdr.c - Parse and dump Stage dump headers */
 extern afs_uint32 ParseStageHdr(XFILE *, unsigned char *, backup_system_header *);
-extern afs_uint32 DumpStagehdr(XFILE *, backup_system_header *);
+extern afs_uint32 ParseStageV20Hdr(XFILE *, unsigned char *, backup_system_header *);
+extern afs_uint32 DumpStageV20Hdr(XFILE *, backup_system_header *);
 
 /* backuphdr.c - Parse and print backup system headers */
 extern void PrintBackupHdr(backup_system_header *);

@@ -49,7 +49,8 @@ static tagged_field top_fields[] = {
   { TAG_VOLHEADER,   DKIND_SPECIAL, "* VOLUME HEADER", parse_volhdr,  0, 0 },
   { TAG_VNODE,       DKIND_SPECIAL, "* VNODE ",        parse_vnode,   0, 0 },
   { TAG_DUMPEND,     DKIND_INT32,   "* DUMP END",      parse_dumpend, 0, 0 },
-  { STAGE_VERSMIN,   DKIND_SPECIAL, "* STAGE HEADER",  try_backuphdr, 0, 0 },
+  { V20_VERSMIN,     DKIND_SPECIAL, "* STAGE HEADER",  try_backuphdr, 0, 0 },
+  { 'S',             DKIND_SPECIAL, "* STAGE HEADER",  try_backuphdr, 0, 0 },
   { 0,0,0,0,0,0 }};
 
 

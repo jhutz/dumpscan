@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 
 #include "dumpscan.h"
@@ -48,7 +49,7 @@ static afs_uint32 hdr_checksum(char *buf, int size)
 }
 
 
-/* Parse a stage backup header.
+/* Parse a modern stage backup header.
  * If tag is non-NULL, *tag should contain the first byte (already read),
  * and will be filled in with the first byte after the header, if one exists.
  * On success, returns 0 and leaves us positioned after the header
@@ -58,31 +59,156 @@ static afs_uint32 hdr_checksum(char *buf, int size)
  */
 afs_uint32 ParseStageHdr(XFILE *X, unsigned char *tag, backup_system_header *hdr)
 {
-  char buf[STAGE_HDRLEN];
-  struct stage_header *bckhdr = (struct stage_header *)buf;
+    char buf[128], *x; /* must be long enough for any string in header */
+    afs_uint32 i32, j32, hdrlen, dumplen, r;
+    u_int64 where;
+
+#define notours() do {                     \
+      if (X->is_seekable) {                \
+        r = xfseek(X, &where);             \
+        return r ? r : DSERR_MAGIC;        \
+      } else return DSERR_MAGIC;           \
+    } while (0)
+
+#define checkr(r) do {                     \
+      if (r == ERROR_XFILE_EOF) notours(); \
+      else if (r) return r;                \
+    } while (0)
+
+#define get32(x) do {                      \
+      r = xfread(X, (char *)&i32, 4);      \
+      checkr(r);                           \
+      (x) = ntohl(i32);                    \
+    } while (0)
+
+#define getstr(x,l) do {                   \
+      memset(buf, 0, sizeof(buf));         \
+      r = xfread(X, buf, (l));             \
+      checkr(r);                           \
+      buf[(l)-1] = 0;                      \
+      (x) = strdup(buf);                   \
+      if (!(x)) return ENOMEM;             \
+    } while (0)
+
+    if (r = xftell(X, &where)) return r;
+    if (hdr) memset(hdr, 0, sizeof(*hdr));
+
+    /* Read the magic number first.  It's possible the caller has already
+     * read the first character.  If this is the case, we need to check it
+     * and return DSERR_MAGIC without reading any more if it is not 'S'.
+     * Once that is done, we read the remaining 3 bytes of magic number.
+     * If the caller did not pre-read anything, read the whole 4 bytes. */
+    if (tag) {
+      if (*tag != 'S') return DSERR_MAGIC;
+      buf[0] = *tag;
+      r = xfread(X, buf + 1, 3);
+      checkr(r);
+      memcpy(&i32, buf, 4);
+      hdr->magic = ntohl(i32);
+    } else {
+      get32(hdr->magic);
+    }
+
+    /* Now the other constant parts, which are easier */
+    get32(hdr->version);
+    get32(hdrlen);
+
+    /* Check the magic number */
+    if (hdr->magic != DUMPHDR_MAGIC) notours();
+
+    /* Now read the rest of the structure */
+    switch (hdr->version) {
+      case DUMPHDR_VERS:
+        if (hdrlen != DUMPHDR_LEN) notours();
+
+        get32(hdr->flags);  /* Really the system type */
+        get32(hdr->volid);
+
+        get32(hdr->from_date);
+        get32(hdr->to_date);
+        hdr->dump_date = hdr->to_date;
+        get32(hdr->level);
+
+        get32(dumplen);
+        set64(hdr->dumplen, dumplen);
+
+        getstr(hdr->server, DUMPHDR_MAXSYSNAME);
+        hdr->part = strdup("");
+        if (!hdr->part) return ENOMEM;
+        getstr(hdr->volname, DUMPHDR_MAXVOLNAME);
+        getstr(x, 2); free(x);
+        break;
+
+
+      case DUMPHDR_VERS64:
+        if (hdrlen != DUMPHDR_LEN64) notours();
+
+        get32(hdr->flags);  /* Really the system type */
+        get32(hdr->volid);
+
+        get32(hdr->from_date);
+        get32(hdr->to_date);
+        hdr->dump_date = hdr->to_date;
+        get32(hdr->level);
+
+        get32(j32);
+        get32(dumplen);
+        mk64(hdr->dumplen, j32, dumplen);
+
+        getstr(hdr->server, DUMPHDR_MAXSYSNAME);
+        hdr->part = strdup("");
+        if (!hdr->part) return ENOMEM;
+        getstr(hdr->volname, DUMPHDR_MAXVOLNAME);
+        break;
+
+      default:
+        notours();
+    }
+
+  if (tag) return ReadByte(X, tag);
+  else return 0;
+}
+
+
+/* Parse a stage "version 20" backup header.
+ * If tag is non-NULL, *tag should contain the first byte (already read),
+ * and will be filled in with the first byte after the header, if one exists.
+ * On success, returns 0 and leaves us positioned after the header
+ * On failure, returns an error and position is undefined
+ * Iff there is no header, returns DSERR_MAGIC and leaves us
+ * positioned where we started.
+ */
+afs_uint32 ParseStageV20Hdr(XFILE *X, unsigned char *tag, backup_system_header *hdr)
+{
+  char buf[V20_HDRLEN];
+  struct v20_header *bckhdr = (struct v20_header *)buf;
   u_int64 where;
   afs_uint32 r;
 
   if (r = xftell(X, &where)) return r;
   if (hdr) memset(hdr, 0, sizeof(*hdr));
   if (tag) {
-    if (*tag != STAGE_VERSMIN) return DSERR_MAGIC;
+    if (*tag != V20_VERSMIN) return DSERR_MAGIC;
     buf[0] = *tag;
-    r = xfread(X, buf + 1, STAGE_HDRLEN - 1);
+    r = xfread(X, buf + 1, V20_HDRLEN - 1);
   } else {
-    r = xfread(X, buf, STAGE_HDRLEN);
+    r = xfread(X, buf, V20_HDRLEN);
   }
 
   if (r == ERROR_XFILE_EOF) {
-    r = xfseek(X, &where);
-    return r ? r : DSERR_MAGIC;
+    if (X->is_seekable) {
+      r = xfseek(X, &where);
+      return r ? r : DSERR_MAGIC;
+    } else return DSERR_MAGIC;
   } else if (r) return r;
 
-  if (bckhdr->c_vers < STAGE_VERSMIN
-  ||  ntohl(bckhdr->c_magic) != STAGE_MAGIC
-  ||  hdr_checksum(buf, STAGE_HDRLEN) != STAGE_CHECKSUM) {
-    r = xfseek(X, &where);
-    return r ? r : DSERR_MAGIC;
+  if (bckhdr->c_vers < V20_VERSMIN
+  ||  ntohl(bckhdr->c_magic) != V20_MAGIC
+  ||  hdr_checksum(buf, V20_HDRLEN) != V20_CHECKSUM) {
+    if (X->is_seekable) {
+      r = xfseek(X, &where);
+      return r ? r : DSERR_MAGIC;
+    } else return DSERR_MAGIC;
   }
 
   if (hdr) {
@@ -92,7 +218,7 @@ afs_uint32 ParseStageHdr(XFILE *X, unsigned char *tag, backup_system_header *hdr
     hdr->dump_date = ntohl(bckhdr->c_time);
     hdr->filenum   = ntohl(bckhdr->c_filenum);
     hdr->volid     = ntohl(bckhdr->c_id);
-    hdr->dumplen   = ntohl(bckhdr->c_length);
+    set64(hdr->dumplen, ntohl(bckhdr->c_length));
     hdr->level     = ntohl(bckhdr->c_level);
     hdr->magic     = ntohl(bckhdr->c_magic);
     hdr->cksum     = ntohl(bckhdr->c_checksum);
@@ -117,24 +243,24 @@ afs_uint32 ParseStageHdr(XFILE *X, unsigned char *tag, backup_system_header *hdr
 }
 
 
-/* Dump a stage backup header */
-afs_uint32 DumpStageHdr(XFILE *OX, backup_system_header *hdr)
+/* Dump a stage "version 20" backup header */
+afs_uint32 DumpStageV20Hdr(XFILE *OX, backup_system_header *hdr)
 {
-  char buf[STAGE_HDRLEN];
-  struct stage_header *bckhdr = (struct stage_header *)buf;
+  char buf[V20_HDRLEN];
+  struct v20_header *bckhdr = (struct v20_header *)buf;
   afs_uint32 checksum;
   afs_uint32 r;
 
-  memset(buf, 0, STAGE_HDRLEN);
+  memset(buf, 0, V20_HDRLEN);
   bckhdr->c_vers     = hdr->version;
   bckhdr->c_fdate    = htonl(hdr->from_date);
   bckhdr->c_tdate    = htonl(hdr->to_date);
   bckhdr->c_filenum  = htonl(hdr->filenum);
   bckhdr->c_time     = htonl(hdr->dump_date);
   bckhdr->c_id       = htonl(hdr->volid);
-  bckhdr->c_length   = htonl(hdr->dumplen);
+  bckhdr->c_length   = htonl(lo64(hdr->dumplen));
   bckhdr->c_level    = htonl(hdr->level);
-  bckhdr->c_magic    = htonl(STAGE_MAGIC);
+  bckhdr->c_magic    = htonl(V20_MAGIC);
   bckhdr->c_flags    = htonl(hdr->flags);
 
   strcpy(bckhdr->c_host, hdr->server);
@@ -142,9 +268,9 @@ afs_uint32 DumpStageHdr(XFILE *OX, backup_system_header *hdr)
   strcpy(bckhdr->c_name, hdr->volname);
 
   /* Now, compute the checksum */
-  checksum = hdr_checksum(buf, STAGE_HDRLEN);
-  bckhdr->c_checksum = htonl(STAGE_CHECKSUM - checksum);
+  checksum = hdr_checksum(buf, V20_HDRLEN);
+  bckhdr->c_checksum = htonl(V20_CHECKSUM - checksum);
 
-  if (r = xfwrite(OX, buf, STAGE_HDRLEN)) return r;
+  if (r = xfwrite(OX, buf, V20_HDRLEN)) return r;
   return 0;
 }
