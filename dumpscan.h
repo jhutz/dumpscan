@@ -211,9 +211,11 @@ typedef struct {
 #define DKIND_FLAG      0x13  /* 1 byte  - true/false */
 #define DKIND_INT16     0x20  /* 2 bytes - decimal */
 #define DKIND_HEX16     0x21  /* 2 bytes - hex */
+#define DKIND_OCT16     0x28  /* 2 bytes - octal */
 #define DKIND_INT32     0x30  /* 4 bytes - decimal */
 #define DKIND_HEX32     0x31  /* 4 bytes - hex */
 #define DKIND_TIME      0x32  /* 4 bytes - time */
+#define DKIND_OCT32     0x38  /* 4 bytes - octal */
 #define DKIND_STRING    0x40  /* ASCIIZ string */
 #define DKIND_SPECIAL   0x50  /* Custom parser */
 #define DKIND_MASK     (~0x0f)

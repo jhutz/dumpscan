@@ -57,7 +57,7 @@ static tagged_field vnode_fields[] = {
   { VTAG_AUTHOR,      DKIND_INT32,   " Author:       ", store_vnode, 0, 0 },
   { VTAG_OWNER,       DKIND_INT32,   " Owner:        ", store_vnode, 0, 0 },
   { VTAG_GROUP,       DKIND_INT32,   " Group:        ", store_vnode, 0, 0 },
-  { VTAG_MODE,        DKIND_INT16,   " UNIX mode:    ", store_vnode, 0, 0 },
+  { VTAG_MODE,        DKIND_OCT16,   " UNIX mode:    ", store_vnode, 0, 0 },
   { VTAG_PARENT,      DKIND_INT32,   " Parent:       ", store_vnode, 0, 0 },
   { VTAG_SERVER_DATE, DKIND_TIME,    " Client Date:  ", store_vnode, 0, 0 },
   { VTAG_ACL,         DKIND_SPECIAL, " xxxxxxxx ACL: ", parse_acl,   0, 0 },
@@ -283,6 +283,8 @@ static afs_uint32 store_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
     case DKIND_BYTE:
     case DKIND_INT16:
     case DKIND_INT32:  printf("%s%d\n",     field->label, value); break;
+    case DKIND_OCT16:
+    case DKIND_OCT32:  printf("%s0%o\n",    field->label, value); break;
     case DKIND_HEX8:   printf("%s0x%02x\n", field->label, value); break;
     case DKIND_HEX16:  printf("%s0x%04x\n", field->label, value); break;
     case DKIND_HEX32:  printf("%s0x%08x\n", field->label, value); break;
