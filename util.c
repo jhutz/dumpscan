@@ -90,7 +90,7 @@ int handle_return(int r, XFILE *X, unsigned char tag, dump_parser *p)
 }
 
 
-/* Prepare a tag_parse_info for use by the dump parser. *
+/* Prepare a tag_parse_info for use by the dump parser. */
 /*** THIS FUNCTION INTENDED FOR INTERNAL USE ONLY ***/
 void prep_pi(dump_parser *p, tag_parse_info *pi)
 {
