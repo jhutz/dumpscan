@@ -33,4 +33,5 @@ error_table AVds
   ec DSERR_KEEP,           "[AFS dumpscan internal: keep string]"
   ec DSERR_PANIC,          "[AFS dumpscan internal: panic]"
   ec DSERR_DONE,           "[AFS dumpscan internal: done]"
+  ec DSERR_MEM,            "[AFS dumpscan internal: out of memory]"
 end

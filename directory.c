@@ -35,6 +35,7 @@
 
 #include "dumpscan.h"
 #include "dumpscan_errs.h"
+#include "xf_errs.h"
 #include "dumpfmt.h"
 #include "internal.h"
 

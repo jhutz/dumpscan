@@ -79,7 +79,7 @@ char *decimate_int64(u_int64 *X, char *buf)
 }
 
 #else
-static char *bitvals[] = {
+static char bitvals[64][21] = {
 /*                1 */ "00000000000000000001",
 /*                2 */ "00000000000000000002",
 /*                4 */ "00000000000000000004",

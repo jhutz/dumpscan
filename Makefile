@@ -3,7 +3,7 @@ AR         = ar
 COMPILE_ET = compile_et
 RANLIB     = ranlib
 
-DEBUGG     = -g
+DEBUG      = -g
 INCLUDES   = -I/usr/local/include
 CFLAGS     = $(DEBUG) $(INCLUDES)
 LDFLAGS    = -L. -L/usr/local/lib -L/usr/local/lib/afs
@@ -22,7 +22,7 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
 
 TARGETS = libxfiles.a libdumpscan.a \
-          afsdump_scan afsdump_dirlist
+          afsdump_scan afsdump_dirlist afsdump_extract
 
 all: $(TARGETS)
 
@@ -34,6 +34,9 @@ afsdump_xsed: libxfiles.a libdumpscan.a $(OBJS_afsdump_xsed)
 
 afsdump_dirlist: libxfiles.a libdumpscan.a afsdump_dirlist.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_dirlist afsdump_dirlist.o $(LIBS)
+
+afsdump_extract: libxfiles.a libdumpscan.a afsdump_extract.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_extract afsdump_extract.o $(LIBS)
 
 null-search: libxfiles.a libdumpscan.a null-search.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o null-search null-search.c $(LIBS)
