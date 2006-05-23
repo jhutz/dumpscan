@@ -59,7 +59,9 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
 
 TARGETS = libxfiles.a libdumpscan.a \
-          afsdump_scan afsdump_dirlist afsdump_extract genrootafs
+          afsdump_scan afsdump_dirlist afsdump_extract genrootafs filteracl
+
+DISTFILES := Makefile README $(filter-out %_errs.c %_errs.h,$(wildcard *.[ch]))
 
 all: $(TARGETS)
 
@@ -80,6 +82,9 @@ genrootafs: libxfiles.a libdumpscan.a genroot.o
 
 null-search: libxfiles.a libdumpscan.a null-search.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o null-search null-search.c $(LIBS)
+
+filteracl: libxfiles.a libdumpscan.a filteracl.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o filteracl filteracl.c $(LIBS)
 
 libxfiles.a: $(OBJS_libxfiles.a)
 	-rm -f libxfiles.a
@@ -104,3 +109,6 @@ stagehdr.o util.o:                              dumpscan_errs.h
 
 clean:
 	-rm -f xf_errs.c xf_errs.h dumpscan_errs.c dumpscan_errs.h *.o $(TARGETS)
+
+dist:
+	tar -czvf dumpscan.tar.gz $(DISTFILES)
