@@ -59,7 +59,7 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
 
 TARGETS = libxfiles.a libdumpscan.a \
-          afsdump_scan afsdump_dirlist afsdump_extract genrootafs filteracl
+          afsdump_scan afsdump_dirlist afsdump_extract genrootafs
 
 DISTFILES := Makefile README $(filter-out %_errs.c %_errs.h,$(wildcard *.[ch]))
 
