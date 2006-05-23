@@ -165,8 +165,8 @@ afs_uint32 DumpVNode(XFILE *OX, afs_vnode *v)
   if (v->field_mask & F_VNODE_DVERS) {
     if (r = WriteTagInt32(OX, VTAG_DVERS, v->datavers)) return r;
   }
-  if (v->field_mask & F_VNODE_SDATE) {
-    if (r = WriteTagInt32(OX, VTAG_SERVER_DATE, v->server_date)) return r;
+  if (v->field_mask & F_VNODE_CDATE) {
+    if (r = WriteTagInt32(OX, VTAG_CLIENT_DATE, v->client_date)) return r;
   }
   if (v->field_mask & F_VNODE_AUTHOR) {
     if (r = WriteTagInt32(OX, VTAG_AUTHOR, v->author)) return r;
@@ -183,8 +183,8 @@ afs_uint32 DumpVNode(XFILE *OX, afs_vnode *v)
   if (v->field_mask & F_VNODE_PARENT) {
     if (r = WriteTagInt32(OX, VTAG_PARENT, v->parent)) return r;
   }
-  if (v->field_mask & F_VNODE_CDATE) {
-    if (r = WriteTagInt32(OX, VTAG_CLIENT_DATE, v->client_date)) return r;
+  if (v->field_mask & F_VNODE_SDATE) {
+    if (r = WriteTagInt32(OX, VTAG_SERVER_DATE, v->server_date)) return r;
   }
   if (v->field_mask & F_VNODE_ACL) {
     if (r = WriteByte(OX, VTAG_ACL)) return r;
