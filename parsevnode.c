@@ -143,35 +143,35 @@ afs_uint32 parse_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
     afs_uint32 drop;
     u_int64 xwhere;
 
-    if (r = xftell(X, &where)) return r;
+    if (r = xftell(X, &where)) goto out;
     sub64_32(xwhere, where, 1);
 
     /* Are we at the start of a valid vnode (or dump end)? */
     r = match_next_vnode(X, p, &xwhere, v.vnode);
-    if (r && r != DSERR_FMT) return r;
+    if (r && r != DSERR_FMT) goto out;
     if (r) { /* Nope. */
       /* Was _this_ a valid vnode?  If so, we can keep it and search for
        * the next one.  Otherwise, we throw it out, and start the search
        * at the starting point of this vnode.
        */
       drop = r = match_next_vnode(X, p, &v.offset, LastGoodVNode);
-      if (r && r != DSERR_FMT) return r;
+      if (r && r != DSERR_FMT) goto out;
       if (!r) {
         add64_32(where, v.offset, 1);
-        if (r = xfseek(X, &v.offset)) return r;
+        if (r = xfseek(X, &v.offset)) goto out;
       } else {
-        if (r = xfseek(X, &xwhere)) return r;
+        if (r = xfseek(X, &xwhere)) goto out;
       }
-      if (r = resync_vnode(X, p, &v, 0, 1024)) return r;
-      if (r = ReadByte(X, tag)) return r;
+      if (r = resync_vnode(X, p, &v, 0, 1024)) goto out;
+      if (r = ReadByte(X, tag)) goto out;
       if (drop) {
         if (p->cb_error)
           (p->cb_error)(DSERR_FMT, 0, p->err_refcon,
                         "Dropping vnode %d", v.vnode);
-        return 0;
+        goto out;
       }
     } else {
-      if (r = xfseek(X, &where)) return r;
+      if (r = xfseek(X, &where)) goto out;
     }
   }
   LastGoodVNode = v.vnode;
@@ -185,17 +185,23 @@ afs_uint32 parse_vnode(XFILE *X, unsigned char *tag, tagged_field *field,
       default:         cb = p->cb_vnode_wierd; break;
       }
     else               cb = p->cb_vnode_empty;
+
     if (cb) {
       u_int64 where;
 
-      if (r = xftell(X, &where)) return r;
-      r = (cb)(&v, X, p->refcon);
+      r = xftell(X, &where);
+      if (!r) r = (cb)(&v, X, p->refcon);
       if (p->flags & DSFLAG_SEEK) {
         if (!r) r = xfseek(X, &where);
         else xfseek(X, &where);
       }
     }
   }
+
+out:
+  if (v.field_mask & F_VNODE_LINK_TARGET)
+    free(v.link_target);
+
   return r;
 }
 
@@ -372,10 +378,10 @@ static afs_uint32 parse_vdata(XFILE *X, unsigned char *tag, tagged_field *field,
                            void *g_refcon, void *l_refcon)
 {
   dump_parser *p = (dump_parser *)g_refcon;
+  afs_uint32 (*cb)(afs_vnode *, XFILE *, void *);
   afs_vnode *v = (afs_vnode *)l_refcon;
-  static char *symlink_buf = 0;
-  static int symlink_size = 0;
   afs_uint32 r;
+  int used = 0;
 
   if (r = ReadInt32(X, &v->size)) return r;
   v->field_mask |= F_VNODE_SIZE;
@@ -389,38 +395,54 @@ static afs_uint32 parse_vdata(XFILE *X, unsigned char *tag, tagged_field *field,
              hexify_int64(&v->d_offset, 0));
     
     switch (v->type) {
-    case vSymlink:
-      if (v->size > symlink_size) {
-        if (symlink_buf) symlink_buf = (char *)realloc(symlink_buf, v->size + 1);
-        else symlink_buf = (char *)malloc(v->size + 1);
-        symlink_size = symlink_buf ? v->size : 0;
-      }
-      if (symlink_buf) {
-        if (r = xfread(X, symlink_buf, v->size)) return r;
-        symlink_buf[v->size] = 0;
-        if (p->print_flags & DSPRINT_VNODE)
-          printf("Target:       %s\n", symlink_buf);
-      } else {
-        /* Call the callback here, because it's non-fatal */
-        if (p->cb_error)
-          (p->cb_error)(ENOMEM, 0, p->err_refcon,
-                        "Out of memory reading symlink");
-        if (r = xfskip(X, v->size)) return r;
-      }
-      break;
-
-    case vDirectory:
-      if (p->cb_dirent || (p->print_flags & DSPRINT_DIR)) {
-        if (r = parse_directory(X, p, v, v->size, 0)) return r;
+      case vSymlink:
+        v->link_target = (char *)malloc(v->size + 1);
+        if (v->link_target) {
+          if (r = xfread(X, v->link_target, v->size)) return r;
+          v->link_target[v->size] = 0;
+          v->field_mask |= F_VNODE_LINK_TARGET;
+          used++;
+          if (p->print_flags & DSPRINT_VNODE)
+            printf("Target:       %s\n", v->link_target);
+        } else {
+          /* Call the callback here, because it's non-fatal */
+          if (p->cb_error)
+            (p->cb_error)(ENOMEM, 0, p->err_refcon,
+                          "Out of memory reading symlink");
+        }
         break;
-      }
 
-    default:
-      if (r = xfskip(X, v->size)) return r;
+      case vDirectory:
+        if (p->cb_dirent || (p->print_flags & DSPRINT_DIR)) {
+          if (r = parse_directory(X, p, v, v->size, 0)) return r;
+          used++;
+        }
+        break;
     }
   } else if (p->print_flags & DSPRINT_VNODE) {
     printf("%sEmpty\n", field->label);
   }
+
+  cb = 0;
+  if (v->field_mask & F_VNODE_TYPE) {
+    switch (v->type) {
+      case vFile:      cb = p->cb_file_data;  break;
+      case vDirectory: cb = p->cb_dir_data;   break;
+      case vSymlink:   cb = p->cb_link_data;  break;
+    }
+  }
+
+  if (cb && (!used || (p->flags & DSFLAG_SEEK))) {
+    if (used && (r = xfseek(X, &v->d_offset))) return r;
+    r = (cb)(v, X, p->refcon);
+    if (r) return r;
+    used++;
+  }
+
+  if (!used) {
+    if ((r = xfskip(X, v->size))) return r;
+  }
+
   if (p->repair_flags & DSFIX_VDSYNC) {
     r = resync_vnode(X, p, v, 10, 15);
     if (r) return r;

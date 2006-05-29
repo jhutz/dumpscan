@@ -174,6 +174,8 @@ typedef struct {
 #define F_VNODE_ACL           0x00000400
 #define F_VNODE_SIZE          0x00000800 /* Set if size is present */
 #define F_VNODE_DATA          0x00001000 /* Set if size nonzero and data present */
+#define F_VNODE_PARTIAL       0x00002000 /* Partial vnode continuation (no header) */
+#define F_VNODE_LINK_TARGET   0x00004000 /* Symlink target present */
 typedef struct {
   u_int64 offset;              /* Where in the input stream is it? */
   afs_uint32 field_mask;       /* What fields are present? */
@@ -191,6 +193,7 @@ typedef struct {
   afs_uint32 server_date;      /* Last modified date on server */
   afs_uint32 size;             /* Size of data */
   u_int64 d_offset;            /* Where in the input stream is the data? */
+  char *link_target;           /* Target of symbolic link */
   unsigned char acl[SIZEOF_LARGEDISKVNODE - SIZEOF_SMALLDISKVNODE];
 } afs_vnode;
 
@@ -254,14 +257,17 @@ typedef struct {
    * make a copy if you want one.
    */
   void *refcon;
-  afs_uint32 (*cb_bckhdr)(backup_system_header *, XFILE *, void *); /* Backup   */
-  afs_uint32 (*cb_dumphdr)(afs_dump_header *, XFILE *, void *); /* Dump hdr     */
-  afs_uint32 (*cb_volhdr)(afs_vol_header *, XFILE *, void *);   /* Volume hdr   */
-  afs_uint32 (*cb_vnode_dir)(afs_vnode *, XFILE *, void *);     /* Directory    */
-  afs_uint32 (*cb_vnode_file)(afs_vnode *, XFILE *, void *);    /* File         */
-  afs_uint32 (*cb_vnode_link)(afs_vnode *, XFILE *, void *);    /* Symlink      */
-  afs_uint32 (*cb_vnode_empty)(afs_vnode *, XFILE *, void *);   /* vnode+uniq   */
-  afs_uint32 (*cb_vnode_wierd)(afs_vnode *, XFILE *, void *);   /* Unknown type */
+  afs_uint32 (*cb_bckhdr)(backup_system_header *, XFILE *, void *); /* Backup Header   */
+  afs_uint32 (*cb_dumphdr)(afs_dump_header *, XFILE *, void *);     /* Dump Header     */
+  afs_uint32 (*cb_volhdr)(afs_vol_header *, XFILE *, void *);       /* Volume Header   */
+  afs_uint32 (*cb_vnode_dir)(afs_vnode *, XFILE *, void *);         /* Directory Vnode */
+  afs_uint32 (*cb_vnode_file)(afs_vnode *, XFILE *, void *);        /* File Vnode      */
+  afs_uint32 (*cb_vnode_link)(afs_vnode *, XFILE *, void *);        /* Symlink Vnode   */
+  afs_uint32 (*cb_vnode_empty)(afs_vnode *, XFILE *, void *);       /* vnode+uniq only */
+  afs_uint32 (*cb_vnode_wierd)(afs_vnode *, XFILE *, void *);       /* Unknown type    */
+  afs_uint32 (*cb_file_data)(afs_vnode *, XFILE *, void *);         /* File Data       */
+  afs_uint32 (*cb_dir_data)(afs_vnode *, XFILE *, void *);          /* Directory Data  */
+  afs_uint32 (*cb_link_data)(afs_vnode *, XFILE *, void *);         /* Symlink Data    */
 
   /* This function is called when there is an error in the dump. */
   /* (cb_error)(errno, fatal, refcon, msg_fmt, msg_args...) */

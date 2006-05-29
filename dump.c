@@ -154,7 +154,10 @@ afs_uint32 DumpVNode(XFILE *OX, afs_vnode *v)
 {
   afs_uint32 r;
 
-  if (r = WriteTagInt32Pair(OX, TAG_VNODE, v->vnode, v->vuniq)) return r;
+  if (!(v->field_mask & F_VNODE_PARTIAL)) {
+    /* Don't dump the initial tag, vnode, and uniq for partial entries */
+    if (r = WriteTagInt32Pair(OX, TAG_VNODE, v->vnode, v->vuniq)) return r;
+  }
 
   if (v->field_mask & F_VNODE_TYPE) {
     if (r = WriteTagByte(OX, VTAG_TYPE, v->type)) return r;

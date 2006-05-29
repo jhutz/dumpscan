@@ -89,8 +89,8 @@ afs_uint32 parse_volhdr(XFILE *X, unsigned char *tag, tagged_field *field,
   r = ParseTaggedData(X, volhdr_fields, tag, pi, g_refcon, (void *)&hdr);
 
   if (!r && p->cb_volhdr) {
-    if (r = xftell(X, &where)) return r;
-    r = (p->cb_volhdr)(&hdr, X, p->refcon);
+    r = xftell(X, &where);
+    if (!r) r = (p->cb_volhdr)(&hdr, X, p->refcon);
     if (p->flags & DSFLAG_SEEK) {
       if (!r) r = xfseek(X, &where);
       else xfseek(X, &where);
