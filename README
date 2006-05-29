@@ -1,5 +1,5 @@
 ** Overview
-   This is version 1.01 of the CMUCS dumpscan tools.  This package
+   This is version 1.2 of the CMUCS dumpscan tools.  This package
    consists of two libraries and several utilities:
 
    - libxfiles is an extensible library for accessing file-like
@@ -28,6 +28,12 @@
    - afsdump_xsed is the beginnings of a tool for modifying the
      contents of a volume dump in a systematic way.
 
+   - genrootafs is a tool which reads a CellServDB file and emits
+     a volume dump suitable for use in creating a root.afs volume.
+     It currently has issues with the stability of the vnode numbers
+     and uniqifiers used, and so is not yet appropriate for use in
+     a production environment.
+
    I originally wrote the dumpscan library to help understand a
    problem in our backup system that was causing restored volume
    dumps to be corrupted, and to attempt to repair those dumps.
@@ -46,21 +52,37 @@
    The latest official distribution of these tools can be obtained
    from any of the following locations:
 
-     /afs/grand.central.org/contrib/celladm/dumpscan
-     http://grand.central.org/dl/contrib/celladm/dumpscan
-     ftp://grand.central.org/pub/contrib/celladm/dumpscan
+     /afs/grand.central.org/software/dumpscan
+     http://grand.central.org/dl/software/dumpscan
+     ftp://grand.central.org/pub/software/dumpscan
 
 
 ** Installation
    At present, there is no configure script or install target.
-   This version builds out of the box on our Linux systems, which
-   have OpenAFS installed in /usr/local.  Other platforms or
-   configurations may require editing the makefile.
+   This version builds out of the box on our Linux and Solaris systems,
+   which have OpenAFS installed in /usr/local.  Other platforms or
+   configurations may require editing the Makefile.
+
+
+** Interface Stability
+   The current command-line options and API's are substantially similar
+   to those of the earliest versions of these tools, but are "unstable"
+   in that I may add new options or make changes from time to time.  In
+   general, it should work to recompile existing source code against new 
+   versions of the library, but there may be minor issues.  I make no
+   promises of ABI stability at this point; if you upgrade to a new
+   version of the library, you must recompile.
+
+   As a result of their age and the relative haste with which these tools
+   were originally put together, the interfaces are all a bit clunky.
+   At some point I will release a version 2.0 whose interfaces will likely
+   be completely redesigned and incompatible with the existing ones.
+   You have been warned.
 
 
 ** Copyright
 
-   Copyright (c) 1998, 2001, 2003 Carnegie Mellon University
+   Copyright (c) 1998, 2001, 2003-2006 Carnegie Mellon University
    All Rights Reserved.
    
    Permission to use, copy, modify and distribute this software and its
