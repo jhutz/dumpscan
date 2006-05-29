@@ -92,12 +92,12 @@ typedef struct {
 #define F_DUMPHDR_FROM        0x00000004
 #define F_DUMPHDR_TO          0x00000008
 typedef struct {
-  u_int64 offset;           /* Where in the file is it? */
+  u_int64 offset;              /* Where in the input stream is it? */
   afs_uint32 field_mask;       /* What fields are present? */
   afs_uint32 magic;            /* Magic number */
   afs_uint32 version;          /* Dump format version */
   afs_uint32 volid;            /* VolID of volume in dump */
-  unsigned char *volname;   /* Name of volume in dump */
+  unsigned char *volname;      /* Name of volume in dump */
   afs_uint32 from_date;        /* Reference date */
   afs_uint32 to_date;          /* Date of dump */
 } afs_dump_header;
@@ -130,15 +130,15 @@ typedef struct {
 #define F_VOLHDR_DAYUSE       0x00800000
 #define F_VOLHDR_DAYUSE_DATE  0x01000000
 typedef struct {
-  u_int64 offset;           /* Where in the file is it? */
+  u_int64 offset;              /* Where in the input stream is it? */
   afs_uint32 field_mask;       /* What fields are present? */
   afs_uint32 volid;            /* Volume ID */
   afs_uint32 volvers;          /* ?? */
-  unsigned char *volname;   /* Volume Name */
-  int     flag_inservice;   /* Inservice flag (0 or not) */
-  int     flag_blessed;     /* Blessed to come online (0 or not) */
+  unsigned char *volname;      /* Volume Name */
+  int     flag_inservice;      /* Inservice flag (0 or not) */
+  int     flag_blessed;        /* Blessed to come online (0 or not) */
   afs_uint32 voluniq;          /* Volume uniquifier */
-  int     voltype;          /* Volume type */
+  int     voltype;             /* Volume type */
   afs_uint32 parent_volid;     /* Parent volume ID */
   afs_uint32 clone_volid;      /* Clone volume ID */
   afs_uint32 maxquota;         /* Max quota */
@@ -152,8 +152,8 @@ typedef struct {
   afs_uint32 update_date;      /* Last modification */
   afs_uint32 expire_date;      /* Expiration (unused) */
   afs_uint32 backup_date;      /* Last backup clone */
-  unsigned char *offline_msg; /* Offline message */
-  unsigned char *motd_msg;    /* Volume MOTD */
+  unsigned char *offline_msg;  /* Offline message */
+  unsigned char *motd_msg;     /* Volume MOTD */
   afs_uint32 weekuse[7];       /* Weekuse data */
   afs_uint32 dayuse;           /* # accesses in last day */
   afs_uint32 dayuse_date;      /* Date for which dayuse is valid */
@@ -171,15 +171,15 @@ typedef struct {
 #define F_VNODE_MODE          0x00000080
 #define F_VNODE_CDATE         0x00000100
 #define F_VNODE_SDATE         0x00000200
-#define F_VNODE_SIZE          0x00000800
-#define F_VNODE_DATA          0x00001000
 #define F_VNODE_ACL           0x00000400
+#define F_VNODE_SIZE          0x00000800 /* Set if size is present */
+#define F_VNODE_DATA          0x00001000 /* Set if size nonzero and data present */
 typedef struct {
-  u_int64 offset;           /* Where in the file is it? */
+  u_int64 offset;              /* Where in the input stream is it? */
   afs_uint32 field_mask;       /* What fields are present? */
   afs_uint32 vnode;            /* Vnode number */
   afs_uint32 vuniq;            /* Uniquifier */
-  int     type;             /* Vnode type */
+  int     type;                /* Vnode type */
   afs_uint16 nlinks;           /* Number of links (should be in 1 dir!) */
   afs_uint32 parent;           /* Parent vnode */
   afs_uint32 datavers;         /* Data version */
@@ -190,7 +190,7 @@ typedef struct {
   afs_uint32 client_date;      /* Last modified date from client */
   afs_uint32 server_date;      /* Last modified date on server */
   afs_uint32 size;             /* Size of data */
-  u_int64 d_offset;         /* Where in the file is the data? */
+  u_int64 d_offset;            /* Where in the input stream is the data? */
   unsigned char acl[SIZEOF_LARGEDISKVNODE - SIZEOF_SMALLDISKVNODE];
 } afs_vnode;
 
