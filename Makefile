@@ -61,7 +61,8 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
 TARGETS = libxfiles.a libdumpscan.a \
           afsdump_scan afsdump_dirlist afsdump_extract genrootafs
 
-DISTFILES := Makefile README $(filter-out %_errs.c %_errs.h,$(wildcard *.[ch]))
+DISTFILES := Makefile README xf_errs.et dumpscan_errs.et \
+             $(filter-out %_errs.c %_errs.h,$(wildcard *.[ch]))
 
 all: $(TARGETS)
 
@@ -111,4 +112,4 @@ clean:
 	-rm -f xf_errs.c xf_errs.h dumpscan_errs.c dumpscan_errs.h *.o $(TARGETS)
 
 dist:
-	tar -czvf dumpscan.tar.gz $(DISTFILES)
+	tar -czvf Dist.tar.gz $(DISTFILES)
