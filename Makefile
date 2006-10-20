@@ -24,13 +24,27 @@
 # any improvements or extensions that they make and grant Carnegie Mellon
 # the rights to redistribute these changes.
 
+VERSION=1.2
+
+# For building my binaries
+#DESTDIR=/afs/cs.cmu.edu/project/systems-jhutz/dumpscan/
+#bindir=.bin/$(VERSION)/$(SYS)
+bindir=${afs}/bin
+
+# Override this if your AFS is not in /usr/local
+afs=/usr/local
+
 AR         = ar
 COMPILE_ET = compile_et
 RANLIB     = ranlib
+_lib = lib
 
 # On Linux:
 ifeq ($(shell uname),Linux)
 R=-Wl,-rpath,
+ifeq ($(shell uname -i),x86_64)
+_lib = lib64
+endif
 endif
 
 # On Solaris:
@@ -41,14 +55,14 @@ XLIBS    = -lsocket -lnsl -lucb -lresolv
 endif
 
 DEBUG      = -g
-INCLUDES   = -I/usr/local/include
+INCLUDES   = -I$(afs)/include
 CFLAGS     = $(DEBUG) $(INCLUDES)
-LDFLAGS    = -L. -L/usr/local/lib $(R)/usr/local/lib -L/usr/local/lib/afs $(XLDFLAGS)
+LDFLAGS    = -L. -L$(afs)/$(_lib) $(R)$(afs)/$(_lib) -L$(afs)/$(_lib)/afs $(XLDFLAGS)
 
 LIBS                 = -ldumpscan -lxfiles \
                        -lauth -laudit -lvolser -lvldb -lubik -lrxkad \
-                       /usr/local/lib/afs/libsys.a -lrx -llwp \
-                       /usr/local/lib/afs/util.a -lcom_err $(XLIBS)
+                       $(afs)/$(_lib)/afs/libsys.a -lrx -llwp \
+                       -lafsutil -lcom_err $(XLIBS)
 OBJS_afsdump_scan    = afsdump_scan.o repair.o
 OBJS_afsdump_xsed    = afsdump_xsed.o repair.o
 OBJS_libxfiles.a     = xfiles.o xfopen.o xf_errs.o xf_printf.o int64.o \
@@ -58,8 +72,8 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        parsedump.o parsevol.o parsevnode.o dump.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
 
-TARGETS = libxfiles.a libdumpscan.a \
-          afsdump_scan afsdump_dirlist afsdump_extract genrootafs
+BINS = afsdump_scan afsdump_dirlist afsdump_extract
+TARGETS = libxfiles.a libdumpscan.a $(BINS)
 
 DISTFILES := Makefile README xf_errs.et dumpscan_errs.et \
              $(filter-out %_errs.c %_errs.h,$(wildcard *.[ch]))
@@ -84,8 +98,9 @@ genrootafs: libxfiles.a libdumpscan.a genroot.o
 null-search: libxfiles.a libdumpscan.a null-search.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o null-search null-search.c $(LIBS)
 
-filteracl: libxfiles.a libdumpscan.a filteracl.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o filteracl filteracl.c $(LIBS)
+# General-purpose target for custom programs
+prog-% : libxfiles.a libdumpscan.a %.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $* $*.c $(LIBS)
 
 libxfiles.a: $(OBJS_libxfiles.a)
 	-rm -f libxfiles.a
@@ -107,6 +122,10 @@ util.o xfiles.o xf_files.o: xf_errs.h
 backuphdr.o directory.o parsedump.o parsetag.o: dumpscan_errs.h
 parsevnode.o parsevol.o pathname.o repair.o:    dumpscan_errs.h
 stagehdr.o util.o:                              dumpscan_errs.h
+
+CPRULE = test -d $(dir $@) || mkdir -p $(dir $@); cp $< $@
+$(DESTDIR)$(bindir)/% : % ; $(CPRULE)
+install: $(BINS:%=$(DESTDIR)$(bindir)/%)
 
 clean:
 	-rm -f xf_errs.c xf_errs.h dumpscan_errs.c dumpscan_errs.h *.o $(TARGETS)
