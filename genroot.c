@@ -37,6 +37,7 @@
 #include <afs/dirpath.h>
 #include <afs/acl.h>
 #include <afs/prs_fs.h>
+#include <com_err.h>
 
 
 struct rootitem {

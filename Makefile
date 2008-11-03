@@ -62,7 +62,7 @@ LDFLAGS    = -L. -L$(afs)/$(_lib) $(R)$(afs)/$(_lib) -L$(afs)/$(_lib)/afs $(XLDF
 LIBS                 = -ldumpscan -lxfiles \
                        -lauth -laudit -lvolser -lvldb -lubik -lrxkad \
                        $(afs)/$(_lib)/afs/libsys.a -lrx -llwp \
-                       -lafsutil -lcom_err $(XLIBS)
+                       -lafsutil -lcom_err $(XLIBS) com_err_compat.o
 OBJS_afsdump_scan    = afsdump_scan.o repair.o
 OBJS_afsdump_xsed    = afsdump_xsed.o repair.o
 OBJS_libxfiles.a     = xfiles.o xfopen.o xf_errs.o xf_printf.o int64.o \
@@ -80,26 +80,26 @@ DISTFILES := Makefile README xf_errs.et dumpscan_errs.et \
 
 all: $(TARGETS)
 
-afsdump_scan: libxfiles.a libdumpscan.a $(OBJS_afsdump_scan)
+afsdump_scan: libxfiles.a libdumpscan.a $(OBJS_afsdump_scan) com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_scan $(OBJS_afsdump_scan) $(LIBS)
 
-afsdump_xsed: libxfiles.a libdumpscan.a $(OBJS_afsdump_xsed)
+afsdump_xsed: libxfiles.a libdumpscan.a $(OBJS_afsdump_xsed) com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_xsed $(OBJS_afsdump_xsed) $(LIBS)
 
-afsdump_dirlist: libxfiles.a libdumpscan.a afsdump_dirlist.o
+afsdump_dirlist: libxfiles.a libdumpscan.a afsdump_dirlist.o com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_dirlist afsdump_dirlist.o $(LIBS)
 
-afsdump_extract: libxfiles.a libdumpscan.a afsdump_extract.o
+afsdump_extract: libxfiles.a libdumpscan.a afsdump_extract.o com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_extract afsdump_extract.o $(LIBS)
 
-genrootafs: libxfiles.a libdumpscan.a genroot.o
+genrootafs: libxfiles.a libdumpscan.a genroot.o com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o genrootafs genroot.o $(LIBS)
 
-null-search: libxfiles.a libdumpscan.a null-search.c
+null-search: libxfiles.a libdumpscan.a null-search.c com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o null-search null-search.c $(LIBS)
 
 # General-purpose target for custom programs
-prog-% : libxfiles.a libdumpscan.a %.c
+prog-% : libxfiles.a libdumpscan.a %.c com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $* $*.c $(LIBS)
 
 libxfiles.a: $(OBJS_libxfiles.a)

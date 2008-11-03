@@ -41,6 +41,7 @@
 #include <afs/cellconfig.h>
 #include <afs/volser.h>
 #include <afs/vlserver.h>
+#include <com_err.h>
 
 #include "dumpscan.h"
 #include "dumpscan_errs.h"

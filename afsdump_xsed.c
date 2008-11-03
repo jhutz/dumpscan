@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <com_err.h>
 
 extern int opterr, optind;
 extern char *optarg;
