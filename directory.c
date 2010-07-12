@@ -292,6 +292,32 @@ afs_uint32 Dir_AddEntry(struct dir_state *ds, char *name,
 }
 
 
+afs_uint32 Dir_MakeFirst(struct dir_state *ds, char *name)
+{
+  int hash = namehash(name, NHASHENT, 0);
+  int laste = 0, e = ntohs(ds->dh->hash[hash]);
+  afs_dir_page *lastpage, *page;
+  int lastentno, entno;
+
+  while (e) {
+    page = (afs_dir_page *)(ds->dirpages[e/EPP]);
+    entno = e % EPP;
+    if (!strcmp(page->entry[entno].name, name))
+      break;
+    laste     = e;
+    lastpage  = page;
+    lastentno = entno;
+    e = ntohs(page->entry[entno].next);
+  }
+  if (!e) return ENOENT;
+  if (!laste) return 0;  // Already first; nothing to do
+  lastpage->entry[lastentno].next = page->entry[entno].next;
+  page->entry[entno].next = ds->dh->hash[hash];
+  ds->dh->hash[hash] = htons(e);
+  return 0;
+}
+
+
 afs_uint32 Dir_Finalize(struct dir_state *ds)
 {
   int pages = ds->pageno + 1;

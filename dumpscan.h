@@ -366,6 +366,7 @@ extern afs_uint32 DirectoryLookup(XFILE *, dump_parser *, afs_uint32,
                            char **, afs_uint32 *, afs_uint32 *);
 extern afs_uint32 Dir_Init(dir_state **);
 extern afs_uint32 Dir_AddEntry(dir_state *, char *, afs_uint32, afs_uint32);
+extern afs_uint32 Dir_MakeFirst(struct dir_state *, char *);
 extern afs_uint32 Dir_Finalize(dir_state *);
 extern afs_uint32 Dir_EmitData(dir_state *, XFILE *, int);
 extern afs_uint32 Dir_Free(dir_state *ds);

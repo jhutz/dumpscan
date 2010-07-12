@@ -72,7 +72,7 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        parsedump.o parsevol.o parsevnode.o dump.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
 
-BINS = afsdump_scan afsdump_dirlist afsdump_extract
+BINS = afsdump_scan afsdump_dirlist afsdump_extract genrootafs
 TARGETS = libxfiles.a libdumpscan.a $(BINS)
 
 DISTFILES := Makefile README xf_errs.et dumpscan_errs.et \

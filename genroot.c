@@ -39,6 +39,9 @@
 #include <afs/prs_fs.h>
 #include <com_err.h>
 
+// Carefully chosen to sort early and hash to 0
+#define RFT_NAME "...rft-9"
+
 
 struct rootitem {
   struct rootitem *next;
@@ -51,7 +54,6 @@ struct rootitem {
 static struct rootitem *root_head, *root_tail;
 static dir_state *DS;
 static afs_uint32 next_vnode;
-static afs_uint32 next_uniq;
 static afs_uint32 when;
 
 static int debug, doaliases, dorft, doallro;
@@ -132,7 +134,7 @@ static void parse_options(int argc, char **argv)
 
 static void die(const char *context, afs_uint32 code)
 {
-  fprintf(stderr, "%s: %s: %s", argv0, context, error_message(code));
+  fprintf(stderr, "%s: %s: %s\n", argv0, context, error_message(code));
   exit(1);
 }
 
@@ -167,19 +169,18 @@ static void add_item(char *name, char *cell, char *vol, char kind)
 
   /* Fill in the item and add it to the list */
   item->vnode = next_vnode;
-  item->uniq  = next_uniq;
+  item->uniq  = when;
   item->kind  = kind;
   if (root_tail) root_tail->next = item;
   else root_head = item;
   root_tail = item;
 
   /* Now add the directory entry */
-  r = Dir_AddEntry(DS, name, next_vnode, next_uniq);
+  r = Dir_AddEntry(DS, name, next_vnode, when);
   if (r) die("addentry", r);
 
   /* Finally increment the counters */
   next_vnode += 2;
-  next_uniq++;
 }
 
 
@@ -274,7 +275,7 @@ void emit(void)
   volhdr.volname = "root.afs";
   volhdr.flag_inservice = 1;
   volhdr.flag_blessed = 1;
-  volhdr.voluniq = next_uniq;
+  volhdr.voluniq = when + 1;
   volhdr.voltype = 0;
   volhdr.parent_volid = 1;
   volhdr.nfiles = next_vnode >> 1;
@@ -357,7 +358,6 @@ int main(int argc, char **argv)
   when = time(0);
   root_head = root_tail = 0;
   next_vnode = 2;
-  next_uniq  = when;
 
   /* Generate the root directory and vnode list */
   if ((r = Dir_Init(&DS)) ||
@@ -365,13 +365,17 @@ int main(int argc, char **argv)
       (r = Dir_AddEntry(DS, "..", 1, 1)))
     die("setup", r);
 
-  if (dorft) add_item(".recursive-find-trap", 0, "root.afs", '#');
+  if (dorft) add_item(RFT_NAME, 0, "root.afs", '#');
   parse_csdb();
   if (!doallro) {
     for (i = 0; i < nrocells; i++)
       add_item(rocells[i], rocells[i]+1, "root.cell", '%');
   }
   if (doaliases) parse_aliases();
+  if ((r = Dir_MakeFirst(DS, "..")) ||
+      (r = Dir_MakeFirst(DS, "."))  ||
+      (dorft && (r = Dir_MakeFirst(DS, RFT_NAME))))
+    die("makefirst", r);
   if (r = Dir_Finalize(DS)) die("finalize", r);
   emit();
   exit(0);
