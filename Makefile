@@ -24,7 +24,7 @@
 # any improvements or extensions that they make and grant Carnegie Mellon
 # the rights to redistribute these changes.
 
-VERSION=1.2
+VERSION=1.3
 
 # For building my binaries
 #DESTDIR=/afs/cs.cmu.edu/project/systems-jhutz/dumpscan/
