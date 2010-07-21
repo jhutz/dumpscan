@@ -40,7 +40,7 @@
 #include <com_err.h>
 
 // Carefully chosen to sort early and hash to 0
-#define RFT_NAME "...rft-9"
+#define RFT_NAME "...0rft-Q"
 
 
 struct rootitem {
