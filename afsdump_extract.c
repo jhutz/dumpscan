@@ -58,7 +58,7 @@ static int name_count, vnum_count;
 
 static char *input_path, *target;
 static int quiet, verbose, error_count, dirs_done, extract_all;
-static int nomode, use_realpath, use_vnum;
+static int nomode, use_realpath, use_vnum, rawmode;
 static int do_acls, do_headers;
 
 static path_hashinfo phi;
@@ -76,6 +76,7 @@ static void usage(int status, char *msg)
   fprintf(stderr, "  -n     Don't actually create files\n");
   fprintf(stderr, "  -p     Use real pathnames internally\n");
   fprintf(stderr, "  -q     Quiet mode (don't print errors)\n");
+  fprintf(stderr, "  -r     Extract raw vnode contents (implies -i)\n");
   fprintf(stderr, "  -v     Verbose mode\n");
   fprintf(stderr, "The destination directory defaults to .\n");
   fprintf(stderr, "Files may be vnode numbers or volume-relative paths;\n");
@@ -99,13 +100,13 @@ static void parse_options(int argc, char **argv)
   /* Initialize options */
   input_path = 0;
   quiet = verbose = nomode = 0;
-  use_realpath = use_vnum = do_acls = do_headers = extract_all = 0;
+  use_realpath = use_vnum = do_acls = do_headers = extract_all = rawmode = 0;
 
   /* Initialize other stuff */
   error_count = 0;
 
   /* Parse the options */
-  while ((c = getopt(argc, argv, "AHhinpqv")) != EOF) {
+  while ((c = getopt(argc, argv, "AHhinpqrv")) != EOF) {
     switch (c) {
       case 'A': do_acls      = 1;                         continue;
       case 'H': do_headers   = 1;                         continue;
@@ -113,6 +114,7 @@ static void parse_options(int argc, char **argv)
       case 'n': nomode       = 1;                         continue;
       case 'p': use_realpath = 1;                         continue;
       case 'q': quiet        = 1;                         continue;
+      case 'r': rawmode = use_vnum = 1;                   continue;
       case 'v': verbose      = 1;                         continue;
       case 'h': usage(0, 0);
       default:  usage(1, "Invalid option!");
@@ -298,6 +300,24 @@ static afs_uint32 volhdr_cb(afs_vol_header *hdr, XFILE *X, void *refcon)
 }
 
 
+static afs_uint32 do_extract(afs_vnode *v, XFILE *X, char *vnodepath)
+{
+  u_int64 where;
+  XFILE OX;
+  int r;
+
+  if ((r = xftell(X, &where))
+      ||  (r = xfseek(X, &v->d_offset))
+      ||  (r = xfopen_path(&OX, O_RDWR|O_CREAT|O_TRUNC, vnodepath + 1, 0644))) {
+    return r;
+  }
+  r = copyfile(X, &OX, v->size);
+  xfclose(&OX);
+  xfseek(X, &where);
+  return r;
+}
+
+
 static afs_uint32 directory_cb(afs_vnode *v, XFILE *X, void *refcon)
 {
   char *vnodepath = 0;
@@ -329,7 +349,12 @@ static afs_uint32 directory_cb(afs_vnode *v, XFILE *X, void *refcon)
     printf("%s\n", vnodepath);
 
   /* Make the directory, if needed */
-  if (!nomode && !use_vnum && use != 2) {
+  if (!nomode && rawmode) {
+    char vnpx[30];
+    sprintf(vnpx, "#%d:%d", v->vnode, v->vuniq);
+    if ((r = do_extract(v, X, vnpx)))
+      return r;
+  } else if (!nomode && !use_vnum && use != 2) {
     if (strcmp(vnodepath, "/")
       && (r = mkdirp(vnodepath + 1))) {
       free(vnodepath);
@@ -385,17 +410,9 @@ static afs_uint32 file_cb(afs_vnode *v, XFILE *X, void *refcon)
     printf("%s\n", vnodepath);
   }
 
-  if (!nomode) {
-    if ((r = xftell(X, &where))
-    ||  (r = xfseek(X, &v->d_offset))
-    ||  (r = xfopen_path(&OX, O_RDWR|O_CREAT|O_TRUNC, vnodepath + 1, 0644))) {
-      if (!use_vnum) free(vnodepath);
-      return r;
-    }
-    r = copyfile(X, &OX, v->size);
-    xfclose(&OX);
-    xfseek(X, &where);
-  } else r = 0;
+  r = 0;
+  if (!nomode)
+    r = do_extract(v, X, vnodepath);
 
   if (!use_vnum && use != 2) free(vnodepath);
   return r;
@@ -457,7 +474,9 @@ static afs_uint32 symlink_cb(afs_vnode *v, XFILE *X, void *refcon)
 
   r = 0;
   if (!nomode) {
-    if (symlink(linktarget, vnodepath + 1))
+    if (rawmode)
+      r = do_extract(v, X, vnodepath);
+    else if (symlink(linktarget, vnodepath + 1))
       r = errno;
   }
 
