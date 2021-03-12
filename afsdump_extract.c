@@ -53,7 +53,7 @@ extern char *optarg;
 
 char *argv0;
 static char **file_names;
-static afs_int32 *file_vnums;
+static afs_uint32 *file_vnums;
 static int name_count, vnum_count;
 
 static char *input_path, *target;
@@ -259,16 +259,20 @@ static int usevnode(XFILE *X, afs_uint32 vnum, char *vnodepath)
 }
 
 
-static int copyfile(XFILE *in, XFILE *out, int size)
+static int copyfile(XFILE *in, XFILE *out, u_int64 size)
 {
   static char buf[COPYBUFSIZE];
-  int nr, nw, r;
+  int nr, r;
+  u_int64 zero64, bufsize64, tmp64;
+  mk64(zero64, 0, 0);
+  mk64(bufsize64, 0, COPYBUFSIZE);
 
-  while (size) {
-    nr = (size > COPYBUFSIZE) ? COPYBUFSIZE : size;
+  while (ne64(size, zero64)) {
+    nr = (gt64(size, bufsize64)) ? COPYBUFSIZE : get64(size);
     if (r = xfread(in, buf, nr)) return r;
     if (r = xfwrite(out, buf, nr)) return r;
-    size -= nr;
+    sub64_32(tmp64, size, nr);
+    cp64(size, tmp64);
   }
   return 0;
 }
@@ -285,6 +289,7 @@ static afs_uint32 my_error_cb(afs_uint32 code, int fatal, void *ref, char *msg, 
     com_err_va(argv0, code, msg, alist);
     va_end(alist);
   }
+  return 0;
 }
 
 
@@ -338,11 +343,11 @@ static afs_uint32 directory_cb(afs_vnode *v, XFILE *X, void *refcon)
   if (verbose) {
     if (use_vnum) 
       printf("d%s %3d %-11d %11d %s #%d:%d\n",
-             modestr(v->mode), v->nlinks, v->owner, v->size,
+             modestr(v->mode), v->nlinks, v->owner, lo64(v->size),
              datestr(v->server_date), v->vnode, v->vuniq);
     else
       printf("d%s %3d %-11d %11d %s %s\n",
-             modestr(v->mode), v->nlinks, v->owner, v->size,
+             modestr(v->mode), v->nlinks, v->owner, lo64(v->size),
              datestr(v->server_date), vnodepath);
   }
   else if (!quiet && !use_vnum)
@@ -404,7 +409,7 @@ static afs_uint32 file_cb(afs_vnode *v, XFILE *X, void *refcon)
   /* Print it out */
   if (verbose) {
     printf("-%s %3d %-11d %11d %s %s\n",
-           modestr(v->mode), v->nlinks, v->owner, v->size,
+           modestr(v->mode), v->nlinks, v->owner, lo64(v->size),
            datestr(v->server_date), vnodepath);
   } else if (!quiet) {
     printf("%s\n", vnodepath);
@@ -450,24 +455,24 @@ static afs_uint32 symlink_cb(afs_vnode *v, XFILE *X, void *refcon)
     vnodepath = vnpx;
   }
 
-  if (!(linktarget = (char *)malloc(v->size + 1))) {
+  if (!(linktarget = (char *)malloc(get64(v->size) + 1))) {
     if (!use_vnum && use != 2) free(vnodepath);
     return DSERR_MEM;
   }
   if ((r = xftell(X, &where))
   ||  (r = xfseek(X, &v->d_offset))
-  ||  (r = xfread(X, linktarget, v->size))) {
+  ||  (r = xfread(X, linktarget, get64(v->size)))) {
     if (!use_vnum && use != 2) free(vnodepath);
     free(linktarget);
     return r;
   }
   xfseek(X, &where);
-  linktarget[v->size] = 0;
+  linktarget[get64(v->size)] = 0;
 
   /* Print it out */
   if (verbose)
     printf("l%s %3d %-11d %11d %s %s -> %s\n",
-           modestr(v->mode), v->nlinks, v->owner, v->size,
+           modestr(v->mode), v->nlinks, v->owner, lo64(v->size),
            datestr(v->server_date), vnodepath, linktarget);
   else if (!quiet)
     printf("%s\n", vnodepath);
@@ -488,8 +493,6 @@ static afs_uint32 symlink_cb(afs_vnode *v, XFILE *X, void *refcon)
 
 static afs_uint32 lose_cb(afs_vnode *v, XFILE *F, void *refcon)
 {
-  int r;
-
   if (!dirs_done) {
     dirs_done = 1;
     if (verbose) printf("* Extracting files...\n");
@@ -504,6 +507,7 @@ int main(int argc, char **argv)
 {
   XFILE input_file;
   afs_uint32 r;
+  int code = 0;
 
   parse_options(argc, argv);
   initialize_acfg_error_table();
@@ -561,5 +565,11 @@ int main(int argc, char **argv)
 
   if (verbose && error_count) fprintf(stderr, "*** %d errors\n", error_count);
   if (r && !quiet) fprintf(stderr, "*** FAILED: %s\n", error_message(r));
-  exit(0);
+
+  if (r) {
+      code = 3;  /* failed */
+  } else if (error_count) {
+      code = 4;  /* errors */
+  }
+  return code;
 }

@@ -74,23 +74,12 @@ static int namehash(char *name, int buckets, int seed)
   return tval ? hval < 0 ? buckets - tval : tval : 0;
 }
 
-static void fixup(char *name, int l)
-{
-  name += 16;
-  l -= 15;
-
-  while (l-- > 0) {
-    name[0] = name[4];
-    name++;
-  }
-}
-
 afs_uint32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
                         afs_uint32 size, int toeof)
 {
   afs_dir_entry de;
-  int pgno, i, j, l, n;
-  afs_uint32 r;
+  int pgno, i, l, n;
+  int r;
   u_int64 where;
 
   if (p->print_flags & DSPRINT_DIR) {
@@ -130,7 +119,6 @@ afs_uint32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
                         pgno, i);
         break;
       }
-/*    fixup(page.entry[i].name, l); */
       if (pgno) de.slot = i - 1 + (pgno - 1) * (EPP - 1) + (EPP - DPHE);
       else de.slot = i - DPHE;
       de.name  = page.entry[i].name;
@@ -138,9 +126,6 @@ afs_uint32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
       de.uniq  = ntohl(page.entry[i].vunique);
       if (p->print_flags & DSPRINT_DIR)
         printf("  %10d %10d  %s\n", de.vnode, de.uniq, de.name);
-      if (p->cb_dirent) {
-        r = (p->cb_dirent)(v, &de, X, p->refcon);
-      }
       if (p->cb_dirent && (r = (p->cb_dirent)(v, &de, X, p->refcon)))
         return r;
       i += ((l + 16) >> 5);
@@ -153,9 +138,8 @@ afs_uint32 parse_directory(XFILE *X, dump_parser *p, afs_vnode *v,
 
 afs_uint32 ParseDirectory(XFILE *X, dump_parser *p, afs_uint32 size, int toeof)
 {
-  afs_uint32 r;
-
-  r = parse_directory(X, p, 0, size, toeof);
+  parse_directory(X, p, 0, size, toeof);
+  return 0;
 }
 
 
@@ -252,8 +236,7 @@ static int allocpage(struct dir_state *ds, int reserve)
 
 afs_uint32 Dir_Init(struct dir_state **dsp)
 {
-  afs_uint32 vnode, uniq, r;
-  int i;
+  afs_uint32 r;
 
   *dsp = malloc(sizeof(struct dir_state));
   if (!*dsp) return ENOMEM;

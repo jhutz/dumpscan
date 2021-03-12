@@ -102,7 +102,7 @@ static afs_uint32 vnode_keep(afs_vnode *v, XFILE *X, void *refcon)
     vhe->parent = v->parent;
   if (v->field_mask & F_VNODE_DATA) {
     cp64(vhe->d_offset, v->d_offset);
-    vhe->d_size   = v->size;
+    cp64(vhe->d_size, v->size);
   }
   if ((v->field_mask & F_VNODE_TYPE) && v->type == vDirectory)
     phi->n_dirs++;
@@ -150,7 +150,6 @@ static afs_uint32 dirent_cb(afs_vnode *v, afs_dir_entry *de,
 afs_uint32 Path_PreScan(XFILE *X, path_hashinfo *phi, int full)
 {
   dump_parser my_p, *p = phi->p;
-  int r;
 
   memset(phi, 0, sizeof(path_hashinfo));
   phi->p = p;
@@ -236,7 +235,7 @@ afs_uint32 Path_Follow(XFILE *X, path_hashinfo *phi,
       return r;
     }
     vnum = 0;
-    r = DirectoryLookup(X, phi->p, vhe->d_size, &name, &vnum, 0);
+    r = DirectoryLookup(X, phi->p, get64(vhe->d_size), &name, &vnum, 0);
     if (r) return r;
     if (!vnum) {
       if (phi->p->cb_error)
@@ -329,7 +328,7 @@ afs_uint32 Path_Build(XFILE *X, path_hashinfo *phi, afs_uint32 vnode,
       }
 
       name = 0;
-      r = DirectoryLookup(X, phi->p, vhe->d_size, &name, &vnode, 0);
+      r = DirectoryLookup(X, phi->p, get64(vhe->d_size), &name, &vnode, 0);
       if (r) return r;
       if (!name) {
         if (phi->p->cb_error)

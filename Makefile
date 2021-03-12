@@ -45,6 +45,7 @@ R=-Wl,-rpath,
 ifeq ($(shell uname -i),x86_64)
 _lib = lib64
 endif
+XCFLAGS=-W -Wall -Wno-parentheses -Wno-unused-parameter -Wno-implicit-function-declaration
 endif
 
 # On Solaris:
@@ -56,7 +57,7 @@ endif
 
 DEBUG      = -g
 INCLUDES   = -I$(afs)/include
-CFLAGS     = $(DEBUG) $(INCLUDES)
+CFLAGS     = $(DEBUG) $(XCFLAGS) $(INCLUDES) -DNATIVE_INT64='long long'
 LDFLAGS    = -L. -L$(afs)/$(_lib) $(R)$(afs)/$(_lib) -L$(afs)/$(_lib)/afs $(XLDFLAGS)
 
 LIBS                 = -ldumpscan -lxfiles \
@@ -72,13 +73,16 @@ OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        parsedump.o parsevol.o parsevnode.o dump.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
 
-BINS = afsdump_scan afsdump_dirlist afsdump_extract genrootafs
+BINS = afsdump_scan afsdump_dirlist afsdump_extract genrootafs afsdump_mtpt
 TARGETS = libxfiles.a libdumpscan.a $(BINS)
 
 DISTFILES := Makefile README xf_errs.et dumpscan_errs.et \
              $(filter-out %_errs.c %_errs.h,$(wildcard *.[ch]))
 
 all: $(TARGETS)
+
+afsdump_mtpt: libxfiles.a libdumpscan.a afsdump_mtpt.o com_err_compat.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_mtpt afsdump_mtpt.o $(LIBS)
 
 afsdump_scan: libxfiles.a libdumpscan.a $(OBJS_afsdump_scan) com_err_compat.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o afsdump_scan $(OBJS_afsdump_scan) $(LIBS)
