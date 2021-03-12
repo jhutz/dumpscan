@@ -31,19 +31,17 @@ VERSION=1.3
 #bindir=.bin/$(VERSION)/$(SYS)
 bindir=${afs}/bin
 
-# Override this if your AFS is not in /usr/local
-afs=/usr/local
-
 AR         = ar
 COMPILE_ET = compile_et
 RANLIB     = ranlib
-_lib = lib
+_libs = lib
+_afsdirs = /usr/afs /usr/local /usr
 
 # On Linux:
 ifeq ($(shell uname),Linux)
 R=-Wl,-rpath,
 ifeq ($(shell uname -i),x86_64)
-_lib = lib64
+_libs += lib64
 endif
 XCFLAGS=-W -Wall -Wno-parentheses -Wno-unused-parameter -Wno-implicit-function-declaration
 endif
@@ -54,6 +52,11 @@ R        = -R
 XLDFLAGS = -L/usr/ucblib -R/usr/ucblib
 XLIBS    = -lsocket -lnsl -lucb -lresolv
 endif
+
+# Override this if your AFS is not in /usr/local
+haslibs=$(wildcard $(addprefix $(1)/,$(addsuffix /afs/util.a,$(_libs))))
+afs:=$(firstword $(foreach x,$(_afsdirs),$(if $(call haslibs,$x),$x)))
+_lib:=$(notdir $(firstword $(wildcard $(addprefix $(afs)/,$(_libs)))))
 
 DEBUG      = -g
 INCLUDES   = -I$(afs)/include
