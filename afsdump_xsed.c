@@ -37,7 +37,6 @@
 #include <afs/stds.h>
 #include <afs/acl.h>
 #include <afs/prs_fs.h>
-#include <afs/com_err.h>
 
 extern int opterr, optind;
 extern char *optarg;
@@ -178,7 +177,7 @@ static afs_uint32 my_error_cb(afs_uint32 code, int fatal, void *ref, char *msg, 
   error_count++;
   if (!quiet) {
     va_start(alist, msg);
-    afs_com_err_va(argv0, code, msg, alist);
+    com_err_va(argv0, code, msg, alist);
     va_end(alist);
   }
 }
@@ -275,7 +274,7 @@ void main(int argc, char **argv)
   initialize_AVds_error_table();
   r = xfopen(X, O_RDONLY, input_path);
   if (r) {
-    afs_com_err(argv0, r, "opening %s", input_path);
+    com_err(argv0, r, "opening %s", input_path);
     exit(2);
   }
 
@@ -293,7 +292,7 @@ void main(int argc, char **argv)
   }
 
   if (gendump_path && (r = setup_repair())) {
-    afs_com_err(argv0, r, "setting up repair output");
+    com_err(argv0, r, "setting up repair output");
     xfclose(X);
     exit(2);
   }
@@ -308,7 +307,7 @@ void main(int argc, char **argv)
     if ((r = xftell(X, &where))
     ||  (r = Path_PreScan(X, &phi, 0))
     ||  (r = xfseek(X, &where))) {
-      afs_com_err(argv0, r, "- path initialization failed");
+      com_err(argv0, r, "- path initialization failed");
       xfclose(X);
       exit(2);
     }
@@ -333,6 +332,6 @@ void main(int argc, char **argv)
   }
 
   if (verbose && error_count) fprintf(stderr, "*** %d errors\n", error_count);
-  if (r && !quiet) fprintf(stderr, "*** FAILED: %s\n", afs_error_message(r));
+  if (r && !quiet) fprintf(stderr, "*** FAILED: %s\n", error_message(r));
   exit(0);
 }

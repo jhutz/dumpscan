@@ -34,7 +34,6 @@
 #include <string.h>
 
 #include <afs/stds.h>
-#include <afs/com_err.h>
 #include <rx/rxkad.h>
 #include <ubik.h>
 #include <afs/cellconfig.h>
@@ -107,7 +106,7 @@ static afs_uint32 my_error_cb(afs_uint32 code, int fatal, void *ref, char *msg, 
   error_count++;
   if (!quiet) {
     va_start(alist, msg);
-    afs_com_err_va(argv0, code, msg, alist);
+    com_err_va(argv0, code, msg, alist);
     va_end(alist);
   }
   return 0;
@@ -131,7 +130,7 @@ int main(int argc, char **argv)
   initialize_xFil_error_table();
   r = xfopen(&input_file, O_RDONLY, input_path);
   if (r) {
-    afs_com_err(argv0, r, "opening %s", input_path);
+    com_err(argv0, r, "opening %s", input_path);
     exit(2);
   }
 
@@ -144,7 +143,7 @@ int main(int argc, char **argv)
   xfclose(&input_file);
 
   if (verbose && error_count) fprintf(stderr, "*** %d errors\n", error_count);
-  if (r && !quiet) fprintf(stderr, "*** FAILED: %s\n", afs_error_message(r));
+  if (r && !quiet) fprintf(stderr, "*** FAILED: %s\n", error_message(r));
 
   if (r) {
       code = 3;  /* failed */
