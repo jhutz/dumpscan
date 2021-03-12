@@ -53,6 +53,14 @@ XLDFLAGS = -L/usr/ucblib -R/usr/ucblib
 XLIBS    = -lsocket -lnsl -lucb -lresolv
 endif
 
+# NetBSD
+ifeq ($(shell uname),NetBSD)
+R        = -Wl,-rpath,
+XLIBS    = -lkrb5 -ldes
+XCFLAGS  = -I$(afs)/include/afs
+_afsdirs += /usr/pkg
+endif
+
 # Override this if your AFS is not in /usr/local
 haslibs=$(wildcard $(addprefix $(1)/,$(addsuffix /afs/util.a,$(_libs))))
 afs:=$(firstword $(foreach x,$(_afsdirs),$(if $(call haslibs,$x),$x)))
@@ -66,12 +74,12 @@ LDFLAGS    = -L. -L$(afs)/$(_lib) $(R)$(afs)/$(_lib) -L$(afs)/$(_lib)/afs $(XLDF
 LIBS                 = -ldumpscan -lxfiles \
                        -lauth -laudit -lvolser -lvldb -lubik -lrxkad \
                        $(afs)/$(_lib)/afs/libsys.a -lrx -llwp \
-                       -lafsutil -lcom_err $(XLIBS) com_err_compat.o
+                       -lafsutil -lcom_err -lz $(XLIBS) com_err_compat.o
 OBJS_afsdump_scan    = afsdump_scan.o repair.o
 OBJS_afsdump_xsed    = afsdump_xsed.o repair.o
 OBJS_libxfiles.a     = xfiles.o xfopen.o xf_errs.o xf_printf.o int64.o \
                        xf_files.o xf_rxcall.o xf_voldump.o \
-                       xf_profile.o xf_profile_name.o
+                       xf_profile.o xf_profile_name.o xf_gzip.o
 OBJS_libdumpscan.a   = primitive.o util.o dumpscan_errs.o parsetag.o \
                        parsedump.o parsevol.o parsevnode.o dump.o \
                        directory.o pathname.o backuphdr.o stagehdr.o
